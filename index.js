@@ -286,8 +286,8 @@ if (PORT) {
       return;
     }
 
-    // ── SSE (protected) ──
-    if (url.pathname === "/sse") {
+    // ── SSE (protected) — handles both /sse and GET / with auth ──
+    if (req.method === "GET" && (url.pathname === "/sse" || (url.pathname === "/" && req.headers["authorization"]))) {
       const user = await validateToken(req);
       if (!user) { unauthorized(res); return; }
 
@@ -312,8 +312,8 @@ if (PORT) {
       return;
     }
 
-    // ── Serve public docs/privacy page ──
-    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
+    // ── Serve public docs/privacy page (only unauthenticated GET /) ──
+    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html") && !req.headers["authorization"]) {
       const filePath = join(__dirname, "public", "index.html");
       if (existsSync(filePath)) {
         res.writeHead(200, { "Content-Type": "text/html" });
