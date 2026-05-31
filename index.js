@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createClerkClient } from "@clerk/backend";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync, existsSync } from "fs";
@@ -286,30 +286,46 @@ if (PORT) {
       return;
     }
 
-    // ── SSE (protected) — handles both /sse and GET / with auth ──
-    if (req.method === "GET" && (url.pathname === "/sse" || (url.pathname === "/" && req.headers["authorization"]))) {
-      const user = await validateToken(req);
-      if (!user) { unauthorized(res); return; }
-
-      const transport = new SSEServerTransport("/", res);
-      transports[transport.sessionId] = transport;
-      res.on("close", () => delete transports[transport.sessionId]);
-
-      const server = createMcpServer();
-      await server.connect(transport);
-      return;
-    }
-
-    // ── Message endpoint (protected) — handles both / and /message ──
-    if (req.method === "POST" && (url.pathname === "/" || url.pathname === "/message")) {
+    // ── MCP Streamable HTTP (protected) — POST or GET to /mcp or / ──
+    if (url.pathname === "/mcp" || url.pathname === "/sse" ||
+        (req.headers["authorization"] && (url.pathname === "/" || url.pathname === "/message"))) {
       const user = await validateToken(req);
       if (!user) { unauthorized(res); return; }
 
       const sessionId = url.searchParams.get("sessionId");
-      const transport = transports[sessionId];
-      if (!transport) { res.writeHead(404); res.end("Session not found"); return; }
-      await transport.handlePostMessage(req, res);
-      return;
+
+      if (req.method === "POST") {
+        // New stateless request or continuing session
+        let transport = sessionId ? transports[sessionId] : null;
+        if (!transport) {
+          transport = new StreamableHTTPServerTransport({
+            sessionIdGenerator: () => crypto.randomUUID(),
+            onsessioninitialized: (sid) => { transports[sid] = transport; },
+          });
+          transport.onclose = () => {
+            if (transport.sessionId) delete transports[transport.sessionId];
+          };
+          const server = createMcpServer();
+          await server.connect(transport);
+        }
+        await transport.handleRequest(req, res);
+        return;
+      }
+
+      if (req.method === "GET") {
+        // SSE stream for existing session
+        const transport = sessionId ? transports[sessionId] : null;
+        if (!transport) { res.writeHead(404); res.end("Session not found"); return; }
+        await transport.handleRequest(req, res);
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const transport = sessionId ? transports[sessionId] : null;
+        if (transport) { await transport.handleRequest(req, res); delete transports[sessionId]; }
+        else { res.writeHead(404); res.end("Session not found"); }
+        return;
+      }
     }
 
     // ── Serve public docs/privacy page (only unauthenticated GET /) ──
