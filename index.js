@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { createClerkClient } from "@clerk/backend";
 import { createClient } from "@supabase/supabase-js";
 import { readFileSync } from "fs";
 import { createServer } from "http";
@@ -20,6 +21,31 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
+const clerk = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+
+const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN
+  ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+  : "http://localhost:3000";
+
+// ─── Auth helper ─────────────────────────────────────────────────────────────
+async function validateToken(req) {
+  const auth = req.headers["authorization"];
+  if (!auth?.startsWith("Bearer ")) return null;
+  const token = auth.slice(7);
+  try {
+    const payload = await clerk.verifyToken(token);
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function unauthorized(res) {
+  res.writeHead(401, { "Content-Type": "application/json" });
+  res.end(JSON.stringify({ error: "Unauthorized" }));
+}
+
+// ─── MCP Server factory ───────────────────────────────────────────────────────
 function createMcpServer() {
   const server = new McpServer({ name: "image-library", version: "1.0.0" });
 
@@ -94,23 +120,94 @@ function createMcpServer() {
 const PORT = process.env.PORT;
 
 if (PORT) {
-  // Railway / remote: SSE over HTTP
-  // Each client connection gets its own McpServer instance
   const transports = {};
 
   const httpServer = createServer(async (req, res) => {
-    // Health check
-    if (req.url === "/health") {
+    const url = new URL(req.url, `http://localhost`);
+
+    // ── Health check (public) ──
+    if (url.pathname === "/health") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({ status: "ok", server: "image-library" }));
       return;
     }
 
-    // SSE connection
-    if (req.url === "/sse") {
+    // ── OAuth metadata discovery (required by MCP spec) ──
+    if (url.pathname === "/.well-known/oauth-authorization-server") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({
+        issuer: BASE_URL,
+        authorization_endpoint: `${BASE_URL}/oauth/authorize`,
+        token_endpoint: `${BASE_URL}/oauth/token`,
+        response_types_supported: ["code"],
+        grant_types_supported: ["authorization_code"],
+        code_challenge_methods_supported: ["S256"],
+      }));
+      return;
+    }
+
+    // ── OAuth authorize — redirect to Clerk hosted login ──
+    if (url.pathname === "/oauth/authorize") {
+      const redirectUri = url.searchParams.get("redirect_uri");
+      const state = url.searchParams.get("state");
+      const codeChallenge = url.searchParams.get("code_challenge");
+
+      // Store params in a temp cookie so callback can use them
+      const params = Buffer.from(JSON.stringify({ redirectUri, state, codeChallenge })).toString("base64");
+      const clerkSignIn = `${process.env.CLERK_PUBLISHABLE_KEY ? "https://accounts." + process.env.CLERK_PUBLISHABLE_KEY.split("_")[2]?.replace(/([a-z])([A-Z])/g,"$1.$2").toLowerCase() + ".clerk.accounts.dev" : "https://clerk.com"}/sign-in?redirect_url=${encodeURIComponent(BASE_URL + "/oauth/callback?params=" + params)}`;
+
+      res.writeHead(302, { Location: clerkSignIn });
+      res.end();
+      return;
+    }
+
+    // ── OAuth callback — exchange Clerk session for MCP token ──
+    if (url.pathname === "/oauth/callback") {
+      const sessionToken = url.searchParams.get("__clerk_db_jwt") ||
+                           req.headers["cookie"]?.match(/__session=([^;]+)/)?.[1];
+      const paramsRaw = url.searchParams.get("params");
+
+      let redirectUri, state;
+      try {
+        ({ redirectUri, state } = JSON.parse(Buffer.from(paramsRaw, "base64").toString()));
+      } catch {
+        res.writeHead(400); res.end("Bad request"); return;
+      }
+
+      // Use session token as the auth code (Clerk JWT is self-contained)
+      const code = sessionToken || "no-session";
+      const redirect = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || "")}`;
+      res.writeHead(302, { Location: redirect });
+      res.end();
+      return;
+    }
+
+    // ── OAuth token exchange ──
+    if (url.pathname === "/oauth/token" && req.method === "POST") {
+      let body = "";
+      req.on("data", chunk => body += chunk);
+      req.on("end", async () => {
+        const params = new URLSearchParams(body);
+        const code = params.get("code");
+
+        // The code is the Clerk JWT — return it as the access token
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({
+          access_token: code,
+          token_type: "Bearer",
+          expires_in: 3600,
+        }));
+      });
+      return;
+    }
+
+    // ── SSE (protected) ──
+    if (url.pathname === "/sse") {
+      const user = await validateToken(req);
+      if (!user) { unauthorized(res); return; }
+
       const transport = new SSEServerTransport("/message", res);
       transports[transport.sessionId] = transport;
-
       res.on("close", () => delete transports[transport.sessionId]);
 
       const server = createMcpServer();
@@ -118,15 +215,14 @@ if (PORT) {
       return;
     }
 
-    // Message endpoint
-    if (req.url?.startsWith("/message")) {
-      const sessionId = new URL(req.url, `http://localhost`).searchParams.get("sessionId");
+    // ── Message endpoint (protected) ──
+    if (url.pathname === "/message") {
+      const user = await validateToken(req);
+      if (!user) { unauthorized(res); return; }
+
+      const sessionId = url.searchParams.get("sessionId");
       const transport = transports[sessionId];
-      if (!transport) {
-        res.writeHead(404);
-        res.end("Session not found");
-        return;
-      }
+      if (!transport) { res.writeHead(404); res.end("Session not found"); return; }
       await transport.handlePostMessage(req, res);
       return;
     }
@@ -139,7 +235,7 @@ if (PORT) {
     console.log(`image-library MCP server running on port ${PORT}`);
   });
 } else {
-  // Local Claude Desktop: stdio
+  // Local Claude Desktop: stdio (no auth needed)
   const server = createMcpServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
