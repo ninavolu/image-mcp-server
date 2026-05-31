@@ -36,6 +36,12 @@ async function validateToken(req) {
   const auth = req.headers["authorization"];
   if (!auth?.startsWith("Bearer ")) return null;
   const token = auth.slice(7);
+
+  // Allow static inspector key for MCP Inspector testing
+  if (process.env.INSPECTOR_KEY && token === process.env.INSPECTOR_KEY) {
+    return { sub: "inspector" };
+  }
+
   try {
     const payload = await clerk.verifyToken(token);
     return payload;
