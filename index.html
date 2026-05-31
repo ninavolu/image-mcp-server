@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Library — MCP Demo</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=fraunces@700,300&f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0e0e0c;
+      --surface:      #161613;
+      --surface-2:    #1e1e1a;
+      --ink:          #f0ece3;
+      --ink-muted:    #8a8778;
+      --accent:       #c8b97a;
+      --accent-dim:   rgba(200,185,122,0.12);
+      --green:        #4a7c59;
+
+      --shadow-2: 0 3px 6px rgba(0,0,0,0.4), 0 3px 6px rgba(0,0,0,0.3);
+      --shadow-4: 0 14px 28px rgba(0,0,0,0.5), 0 10px 10px rgba(0,0,0,0.4);
+      --shadow-5: 0 24px 48px rgba(0,0,0,0.6), 0 18px 18px rgba(0,0,0,0.4);
+
+      --ease-expo:   cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --ease-silk:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── HEADER ── */
+    header {
+      padding: 3rem 4rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid rgba(240,236,227,0.08);
+      animation: fadeDown 0.9s var(--ease-expo) both;
+    }
+
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+    }
+
+    .logo span {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+      border: 1px solid rgba(240,236,227,0.12);
+      padding: 0.4rem 0.85rem;
+      border-radius: 2rem;
+    }
+
+    .badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: pulse 2s ease infinite;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 5rem 4rem 3rem;
+      max-width: 700px;
+      animation: fadeUp 1s var(--ease-expo) 0.15s both;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.8rem, 6vw, 4.8rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.4rem;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--ink-muted);
+      max-width: 480px;
+      line-height: 1.75;
+    }
+
+    .hero p code {
+      font-family: monospace;
+      font-size: 0.9em;
+      background: var(--accent-dim);
+      color: var(--accent);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+    }
+
+    /* ── STATS BAR ── */
+    .stats {
+      margin: 0 4rem;
+      padding: 1.5rem 2rem;
+      background: var(--surface);
+      border: 1px solid rgba(240,236,227,0.07);
+      border-radius: 12px;
+      display: flex;
+      gap: 3rem;
+      animation: fadeUp 0.8s var(--ease-expo) 0.35s both;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--ink-muted);
+    }
+
+    .stat-divider {
+      width: 1px;
+      background: rgba(240,236,227,0.08);
+      align-self: stretch;
+    }
+
+    /* ── GALLERY ── */
+    .gallery-header {
+      padding: 4rem 4rem 2rem;
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      animation: fadeUp 0.8s var(--ease-expo) 0.5s both;
+    }
+
+    .gallery-header h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .gallery-header span {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+    }
+
+    .gallery {
+      padding: 0 4rem 6rem;
+      columns: 2;
+      column-gap: 1.5rem;
+    }
+
+    /* ── CARD ── */
+    .card {
+      break-inside: avoid;
+      margin-bottom: 1.5rem;
+      background: var(--surface);
+      border: 1px solid rgba(240,236,227,0.07);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow-2);
+      transform: perspective(800px) rotateY(0deg) rotateX(0deg) translateZ(0);
+      transition: box-shadow 0.4s var(--ease-silk), border-color 0.3s ease;
+      opacity: 0;
+      transform: translateY(32px);
+    }
+
+    .card.visible {
+      animation: cardReveal 0.7s var(--ease-expo) forwards;
+    }
+
+    .card:nth-child(2) { animation-delay: 0.1s; }
+    .card:nth-child(3) { animation-delay: 0.2s; }
+    .card:nth-child(4) { animation-delay: 0.3s; }
+
+    .card:hover {
+      box-shadow: var(--shadow-5);
+      border-color: rgba(200,185,122,0.2);
+    }
+
+    .card-img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      transition: transform 0.6s var(--ease-silk), filter 0.4s ease;
+      filter: saturate(0.85) brightness(0.92);
+    }
+
+    .card:hover .card-img {
+      transform: scale(1.04);
+      filter: saturate(1.05) brightness(1);
+    }
+
+    .card-body {
+      padding: 1.25rem 1.4rem 1.4rem;
+    }
+
+    .card-name {
+      font-family: 'Fraunces', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.5rem;
+      color: var(--ink);
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.85rem;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .tag-purpose {
+      background: var(--accent-dim);
+      color: var(--accent);
+      border: 1px solid rgba(200,185,122,0.25);
+    }
+
+    .tag-label {
+      background: rgba(240,236,227,0.06);
+      color: var(--ink-muted);
+      border: 1px solid rgba(240,236,227,0.1);
+    }
+
+    .card:hover .tag-label {
+      background: rgba(240,236,227,0.1);
+      color: var(--ink);
+    }
+
+    .card-url {
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0.6;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(240,236,227,0.08);
+      padding: 2rem 4rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--ink-muted);
+      font-size: 0.8rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(32px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    @media (max-width: 768px) {
+      header, .hero, .stats, .gallery-header, .gallery, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .gallery { columns: 1; }
+      .stats { gap: 1.5rem; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">image<span>lib</span></div>
+    <div class="badge">MCP Server Live</div>
+  </header>
+
+  <section class="hero">
+    <p class="hero-eyebrow">Proof of Concept</p>
+    <h1>Your images,<br /><em>on demand.</em></h1>
+    <p>
+      Every image below was retrieved via the <code>search_images</code> MCP tool —
+      stored in Supabase, tagged and purposeful, ready for Claude to use anywhere.
+    </p>
+  </section>
+
+  <div class="stats">
+    <div class="stat-item">
+      <span class="stat-value" id="count">4</span>
+      <span class="stat-label">Images indexed</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value">1</span>
+      <span class="stat-label">Purpose tag</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value">1</span>
+      <span class="stat-label">Label tag</span>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <span class="stat-value">0ms</span>
+      <span class="stat-label">Local storage</span>
+    </div>
+  </div>
+
+  <div class="gallery-header">
+    <h2>Library</h2>
+    <span>nature · other · all images</span>
+  </div>
+
+  <div class="gallery" id="gallery">
+
+    <div class="card">
+      <img class="card-img" src="https://ohdrnymwmhdtqfvaboxe.supabase.co/storage/v1/object/public/images/ykaiavu-field-9652621_1920.jpg" alt="field" loading="lazy" />
+      <div class="card-body">
+        <div class="card-name">ykaiavu-field</div>
+        <div class="card-meta">
+          <span class="tag tag-purpose">other</span>
+          <span class="tag tag-label">nature</span>
+        </div>
+        <div class="card-url">supabase.co/…/ykaiavu-field-9652621_1920.jpg</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" src="https://ohdrnymwmhdtqfvaboxe.supabase.co/storage/v1/object/public/images/mirek_hejnicki-beskid-10094941_1920.jpg" alt="beskid" loading="lazy" />
+      <div class="card-body">
+        <div class="card-name">mirek_hejnicki-beskid</div>
+        <div class="card-meta">
+          <span class="tag tag-purpose">other</span>
+          <span class="tag tag-label">nature</span>
+        </div>
+        <div class="card-url">supabase.co/…/mirek_hejnicki-beskid-10094941_1920.jpg</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" src="https://ohdrnymwmhdtqfvaboxe.supabase.co/storage/v1/object/public/images/davidclode-chameleon-10277347_1920.jpg" alt="chameleon" loading="lazy" />
+      <div class="card-body">
+        <div class="card-name">davidclode-chameleon</div>
+        <div class="card-meta">
+          <span class="tag tag-purpose">other</span>
+          <span class="tag tag-label">nature</span>
+        </div>
+        <div class="card-url">supabase.co/…/davidclode-chameleon-10277347_1920.jpg</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="card-img" src="https://ohdrnymwmhdtqfvaboxe.supabase.co/storage/v1/object/public/images/7010naoto-nature-9715206_1920.jpg" alt="nature" loading="lazy" />
+      <div class="card-body">
+        <div class="card-name">7010naoto-nature</div>
+        <div class="card-meta">
+          <span class="tag tag-purpose">other</span>
+          <span class="tag tag-label">nature</span>
+        </div>
+        <div class="card-url">supabase.co/…/7010naoto-nature-9715206_1920.jpg</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Powered by Supabase + MCP image-library server</span>
+    <span>4 images · 0 stored locally</span>
+  </footer>
+
+  <script>
+    // Scroll reveal
+    const cards = document.querySelectorAll('.card');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    cards.forEach(c => observer.observe(c));
+
+    // Mouse-tracking 3D tilt
+    cards.forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width  - 0.5;
+        const y = (e.clientY - r.top)  / r.height - 0.5;
+        card.style.transform = `perspective(800px) rotateY(${x * 10}deg) rotateX(${y * -10}deg) translateZ(10px)`;
+        card.style.transition = 'transform 0.08s linear, box-shadow 0.4s ease, border-color 0.3s ease';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) translateZ(0)';
+        card.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease, border-color 0.3s ease';
+      });
+    });
+  </script>
+</body>
+</html>
