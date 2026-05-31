@@ -26,7 +26,12 @@ function createMcpServer() {
   // ─── search_images ──────────────────────────────────────────────────────────
   server.tool(
     "search_images",
-    "Search the image library by purpose and/or tags. Returns matching images with their file paths.",
+    {
+      title: "Search Images",
+      description: "Search the image library by purpose and/or tags. Returns matching images with their file paths.",
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
     {
       purpose: z
         .enum(["landing-page","hero","document","thumbnail","icon","background","product","avatar","other"])
@@ -55,7 +60,12 @@ function createMcpServer() {
   // ─── list_images ────────────────────────────────────────────────────────────
   server.tool(
     "list_images",
-    "List all images in the library, optionally paginated.",
+    {
+      title: "List Images",
+      description: "List all images in the library, optionally paginated.",
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
     {
       limit: z.number().default(20).describe("Max results"),
       offset: z.number().default(0).describe("Offset for pagination"),
