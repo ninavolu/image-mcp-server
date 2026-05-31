@@ -164,7 +164,7 @@ if (PORT) {
 
       // Store params in a temp cookie so callback can use them
       const params = Buffer.from(JSON.stringify({ redirectUri, state, codeChallenge })).toString("base64");
-      const clerkSignIn = `${process.env.CLERK_PUBLISHABLE_KEY ? "https://accounts." + process.env.CLERK_PUBLISHABLE_KEY.split("_")[2]?.replace(/([a-z])([A-Z])/g,"$1.$2").toLowerCase() + ".clerk.accounts.dev" : "https://clerk.com"}/sign-in?redirect_url=${encodeURIComponent(BASE_URL + "/oauth/callback?params=" + params)}`;
+      const clerkSignIn = `https://accounts.pixlib.app/sign-in?redirect_url=${encodeURIComponent(BASE_URL + "/oauth/callback?params=" + params)}`;
 
       res.writeHead(302, { Location: clerkSignIn });
       res.end();
