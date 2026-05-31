@@ -156,37 +156,40 @@ if (PORT) {
       return;
     }
 
-    // ── OAuth authorize — redirect to Clerk hosted login ──
+    // ── OAuth authorize — redirect to Clerk OAuth ──
     if (url.pathname === "/oauth/authorize") {
       const redirectUri = url.searchParams.get("redirect_uri");
       const state = url.searchParams.get("state");
       const codeChallenge = url.searchParams.get("code_challenge");
+      const codeChallengeMethod = url.searchParams.get("code_challenge_method");
 
-      // Store params in a temp cookie so callback can use them
-      const params = Buffer.from(JSON.stringify({ redirectUri, state, codeChallenge })).toString("base64");
-      const clerkSignIn = `https://accounts.pixlib.app/sign-in?redirect_url=${encodeURIComponent(BASE_URL + "/oauth/callback?params=" + params)}`;
+      const clerkAuthUrl = new URL("https://clerk.pixlib.app/oauth/authorize");
+      clerkAuthUrl.searchParams.set("client_id", process.env.CLERK_OAUTH_CLIENT_ID);
+      clerkAuthUrl.searchParams.set("redirect_uri", `${BASE_URL}/oauth/callback`);
+      clerkAuthUrl.searchParams.set("response_type", "code");
+      clerkAuthUrl.searchParams.set("scope", "profile email");
+      clerkAuthUrl.searchParams.set("state", Buffer.from(JSON.stringify({ state, redirectUri })).toString("base64"));
+      if (codeChallenge) clerkAuthUrl.searchParams.set("code_challenge", codeChallenge);
+      if (codeChallengeMethod) clerkAuthUrl.searchParams.set("code_challenge_method", codeChallengeMethod);
 
-      res.writeHead(302, { Location: clerkSignIn });
+      res.writeHead(302, { Location: clerkAuthUrl.toString() });
       res.end();
       return;
     }
 
-    // ── OAuth callback — exchange Clerk session for MCP token ──
+    // ── OAuth callback — exchange Clerk code for token ──
     if (url.pathname === "/oauth/callback") {
-      const sessionToken = url.searchParams.get("__clerk_db_jwt") ||
-                           req.headers["cookie"]?.match(/__session=([^;]+)/)?.[1];
-      const paramsRaw = url.searchParams.get("params");
+      const code = url.searchParams.get("code");
+      const stateRaw = url.searchParams.get("state");
 
-      let redirectUri, state;
+      let redirectUri, originalState;
       try {
-        ({ redirectUri, state } = JSON.parse(Buffer.from(paramsRaw, "base64").toString()));
+        ({ redirectUri, state: originalState } = JSON.parse(Buffer.from(stateRaw, "base64").toString()));
       } catch {
         res.writeHead(400); res.end("Bad request"); return;
       }
 
-      // Use session token as the auth code (Clerk JWT is self-contained)
-      const code = sessionToken || "no-session";
-      const redirect = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || "")}`;
+      const redirect = `${redirectUri}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(originalState || "")}`;
       res.writeHead(302, { Location: redirect });
       res.end();
       return;
@@ -199,13 +202,29 @@ if (PORT) {
       req.on("end", async () => {
         const params = new URLSearchParams(body);
         const code = params.get("code");
+        const codeVerifier = params.get("code_verifier");
 
-        // The code is the Clerk JWT — return it as the access token
-        res.writeHead(200, { "Content-Type": "application/json" });
+        // Exchange code with Clerk
+        const tokenRes = await fetch("https://clerk.pixlib.app/oauth/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            grant_type: "authorization_code",
+            code,
+            redirect_uri: `${BASE_URL}/oauth/callback`,
+            client_id: process.env.CLERK_OAUTH_CLIENT_ID,
+            client_secret: process.env.CLERK_OAUTH_CLIENT_SECRET,
+            ...(codeVerifier ? { code_verifier: codeVerifier } : {}),
+          }),
+        });
+
+        const tokenData = await tokenRes.json();
+
+        res.writeHead(tokenRes.status, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
-          access_token: code,
+          access_token: tokenData.access_token,
           token_type: "Bearer",
-          expires_in: 3600,
+          expires_in: tokenData.expires_in || 3600,
         }));
       });
       return;
