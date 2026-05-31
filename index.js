@@ -286,46 +286,26 @@ if (PORT) {
       return;
     }
 
-    // ── MCP Streamable HTTP (protected) — POST or GET to /mcp or / ──
+    // ── MCP Streamable HTTP (protected) ──
     if (url.pathname === "/mcp" || url.pathname === "/sse" ||
-        (req.headers["authorization"] && (url.pathname === "/" || url.pathname === "/message"))) {
+        url.pathname === "/message" ||
+        (req.headers["authorization"] && url.pathname === "/")) {
       const user = await validateToken(req);
       if (!user) { unauthorized(res); return; }
 
-      const sessionId = url.searchParams.get("sessionId");
-
+      // Stateless: create a fresh server+transport per POST request
       if (req.method === "POST") {
-        // New stateless request or continuing session
-        let transport = sessionId ? transports[sessionId] : null;
-        if (!transport) {
-          transport = new StreamableHTTPServerTransport({
-            sessionIdGenerator: () => crypto.randomUUID(),
-            onsessioninitialized: (sid) => { transports[sid] = transport; },
-          });
-          transport.onclose = () => {
-            if (transport.sessionId) delete transports[transport.sessionId];
-          };
-          const server = createMcpServer();
-          await server.connect(transport);
-        }
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined, // stateless mode
+        });
+        const mcpServer = createMcpServer();
+        await mcpServer.connect(transport);
         await transport.handleRequest(req, res);
         return;
       }
 
-      if (req.method === "GET") {
-        // SSE stream for existing session
-        const transport = sessionId ? transports[sessionId] : null;
-        if (!transport) { res.writeHead(404); res.end("Session not found"); return; }
-        await transport.handleRequest(req, res);
-        return;
-      }
-
-      if (req.method === "DELETE") {
-        const transport = sessionId ? transports[sessionId] : null;
-        if (transport) { await transport.handleRequest(req, res); delete transports[sessionId]; }
-        else { res.writeHead(404); res.end("Session not found"); }
-        return;
-      }
+      res.writeHead(405); res.end("Method not allowed");
+      return;
     }
 
     // ── Serve public docs/privacy page (only unauthenticated GET /) ──
