@@ -222,6 +222,7 @@ if (PORT) {
         const codeVerifier = params.get("code_verifier");
 
         // Exchange code with Clerk
+        console.log("[token] exchanging code with Clerk, redirect_uri:", `${BASE_URL}/oauth/callback`);
         const tokenRes = await fetch(`${CLERK_FRONTEND_API}/oauth/token`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -236,6 +237,7 @@ if (PORT) {
         });
 
         const tokenData = await tokenRes.json();
+        console.log("[token] Clerk response status:", tokenRes.status, "data:", JSON.stringify(tokenData));
 
         res.writeHead(tokenRes.status, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
