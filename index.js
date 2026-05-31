@@ -240,11 +240,13 @@ if (PORT) {
         const tokenData = await tokenRes.json();
         console.log("[token] Clerk response status:", tokenRes.status, "data:", JSON.stringify(tokenData));
 
-        res.writeHead(tokenRes.status, { "Content-Type": "application/json" });
+        res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
           access_token: tokenData.access_token,
+          refresh_token: tokenData.refresh_token,
           token_type: "Bearer",
           expires_in: tokenData.expires_in || 3600,
+          scope: tokenData.scope,
         }));
       });
       return;
