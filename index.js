@@ -161,16 +161,32 @@ if (PORT) {
     }
 
     // ── OAuth metadata discovery (required by MCP spec) ──
-    if (url.pathname === "/.well-known/oauth-authorization-server") {
+    if (url.pathname === "/.well-known/oauth-authorization-server" || url.pathname === "/.well-known/openid-configuration") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({
-        issuer: BASE_URL,
+        issuer: CLERK_FRONTEND_API,
         authorization_endpoint: `${BASE_URL}/oauth/authorize`,
         token_endpoint: `${BASE_URL}/oauth/token`,
+        userinfo_endpoint: `${BASE_URL}/oauth/userinfo`,
+        jwks_uri: `${CLERK_FRONTEND_API}/.well-known/jwks.json`,
         response_types_supported: ["code"],
-        grant_types_supported: ["authorization_code"],
+        grant_types_supported: ["authorization_code", "refresh_token"],
         code_challenge_methods_supported: ["S256"],
+        token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
+        scopes_supported: ["profile", "email", "offline_access"],
       }));
+      return;
+    }
+
+    // ── Userinfo proxy ──
+    if (url.pathname === "/oauth/userinfo") {
+      const auth = req.headers["authorization"];
+      const proxyRes = await fetch(`${CLERK_FRONTEND_API}/oauth/userinfo`, {
+        headers: { Authorization: auth },
+      });
+      const data = await proxyRes.json();
+      res.writeHead(proxyRes.status, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(data));
       return;
     }
 
