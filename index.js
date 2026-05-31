@@ -60,6 +60,7 @@ async function validateToken(req) {
     });
 
     const data = await res.json();
+    console.log("[validateToken] token_info status:", res.status, "active:", data.active, "data:", JSON.stringify(data));
     if (data.active) return data;
     return null;
   } catch {
