@@ -31,6 +31,8 @@ const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN
   ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
   : "http://localhost:3000";
 
+const CLERK_FRONTEND_API = "https://clerk.pixlib.app";
+
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 async function validateToken(req) {
   const auth = req.headers["authorization"];
@@ -42,9 +44,24 @@ async function validateToken(req) {
     return { sub: "inspector" };
   }
 
+  // Validate OAuth access token via Clerk token_info endpoint
   try {
-    const payload = await clerk.verifyToken(token);
-    return payload;
+    const credentials = Buffer.from(
+      `${process.env.CLERK_OAUTH_CLIENT_ID}:${process.env.CLERK_OAUTH_CLIENT_SECRET}`
+    ).toString("base64");
+
+    const res = await fetch(`${CLERK_FRONTEND_API}/oauth/token_info`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${credentials}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ token }),
+    });
+
+    const data = await res.json();
+    if (data.active) return data;
+    return null;
   } catch {
     return null;
   }
@@ -163,7 +180,7 @@ if (PORT) {
       const codeChallenge = url.searchParams.get("code_challenge");
       const codeChallengeMethod = url.searchParams.get("code_challenge_method");
 
-      const clerkAuthUrl = new URL("https://clerk.pixlib.app/oauth/authorize");
+      const clerkAuthUrl = new URL(`${CLERK_FRONTEND_API}/oauth/authorize`);
       clerkAuthUrl.searchParams.set("client_id", process.env.CLERK_OAUTH_CLIENT_ID);
       clerkAuthUrl.searchParams.set("redirect_uri", `${BASE_URL}/oauth/callback`);
       clerkAuthUrl.searchParams.set("response_type", "code");
@@ -205,7 +222,7 @@ if (PORT) {
         const codeVerifier = params.get("code_verifier");
 
         // Exchange code with Clerk
-        const tokenRes = await fetch("https://clerk.pixlib.app/oauth/token", {
+        const tokenRes = await fetch(`${CLERK_FRONTEND_API}/oauth/token`, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
