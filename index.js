@@ -33,6 +33,16 @@ const BASE_URL = process.env.RAILWAY_PUBLIC_DOMAIN
 
 const CLERK_FRONTEND_API = "https://clerk.pixlib.app";
 
+// ─── Opaque token store (in-memory) ──────────────────────────────────────────
+// Maps our random token → { clerkToken, expiresAt }
+const tokenStore = new Map();
+
+function generateToken() {
+  const bytes = new Uint8Array(32);
+  crypto.getRandomValues(bytes);
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
 // ─── Auth helper ─────────────────────────────────────────────────────────────
 async function validateToken(req) {
   const auth = req.headers["authorization"];
@@ -44,28 +54,13 @@ async function validateToken(req) {
     return { sub: "inspector" };
   }
 
-  // Validate OAuth access token via Clerk token_info endpoint
-  try {
-    const credentials = Buffer.from(
-      `${process.env.CLERK_OAUTH_CLIENT_ID}:${process.env.CLERK_OAUTH_CLIENT_SECRET}`
-    ).toString("base64");
+  // Look up opaque token in store
+  const entry = tokenStore.get(token);
+  if (!entry) { console.log("[validateToken] token not found in store"); return null; }
+  if (Date.now() > entry.expiresAt) { tokenStore.delete(token); console.log("[validateToken] token expired"); return null; }
 
-    const res = await fetch(`${CLERK_FRONTEND_API}/oauth/token_info`, {
-      method: "POST",
-      headers: {
-        Authorization: `Basic ${credentials}`,
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({ token }),
-    });
-
-    const data = await res.json();
-    console.log("[validateToken] token_info status:", res.status, "active:", data.active, "data:", JSON.stringify(data));
-    if (data.active) return data;
-    return null;
-  } catch {
-    return null;
-  }
+  console.log("[validateToken] valid token for sub:", entry.sub);
+  return { sub: entry.sub };
 }
 
 function unauthorized(res) {
@@ -164,13 +159,12 @@ if (PORT) {
     if (url.pathname === "/.well-known/oauth-authorization-server" || url.pathname === "/.well-known/openid-configuration") {
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify({
-        issuer: CLERK_FRONTEND_API,
+        issuer: BASE_URL,
         authorization_endpoint: `${BASE_URL}/oauth/authorize`,
         token_endpoint: `${BASE_URL}/oauth/token`,
         userinfo_endpoint: `${BASE_URL}/oauth/userinfo`,
-        jwks_uri: `${CLERK_FRONTEND_API}/.well-known/jwks.json`,
         response_types_supported: ["code"],
-        grant_types_supported: ["authorization_code", "refresh_token"],
+        grant_types_supported: ["authorization_code"],
         code_challenge_methods_supported: ["S256"],
         token_endpoint_auth_methods_supported: ["client_secret_basic", "client_secret_post", "none"],
         scopes_supported: ["profile", "email", "offline_access"],
@@ -254,14 +248,37 @@ if (PORT) {
         });
 
         const tokenData = await tokenRes.json();
-        console.log("[token] Clerk response status:", tokenRes.status, "data:", JSON.stringify(tokenData));
+        console.log("[token] Clerk response status:", tokenRes.status);
+
+        if (!tokenData.access_token) {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "token_exchange_failed", details: tokenData }));
+          return;
+        }
+
+        // Get user info from Clerk to store sub
+        const userRes = await fetch(`${CLERK_FRONTEND_API}/oauth/userinfo`, {
+          headers: { Authorization: `Bearer ${tokenData.access_token}` },
+        });
+        const userData = await userRes.json();
+        const sub = userData.sub || "unknown";
+
+        // Generate opaque token and store it
+        const opaqueToken = generateToken();
+        const expiresIn = tokenData.expires_in || 86400;
+        tokenStore.set(opaqueToken, {
+          clerkToken: tokenData.access_token,
+          sub,
+          expiresAt: Date.now() + expiresIn * 1000,
+        });
+
+        console.log("[token] issued opaque token for sub:", sub);
 
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify({
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
+          access_token: opaqueToken,
           token_type: "Bearer",
-          expires_in: tokenData.expires_in || 3600,
+          expires_in: expiresIn,
           scope: tokenData.scope,
         }));
       });
