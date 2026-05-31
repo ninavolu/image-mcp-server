@@ -291,7 +291,7 @@ if (PORT) {
       const user = await validateToken(req);
       if (!user) { unauthorized(res); return; }
 
-      const transport = new SSEServerTransport("/message", res);
+      const transport = new SSEServerTransport("/", res);
       transports[transport.sessionId] = transport;
       res.on("close", () => delete transports[transport.sessionId]);
 
@@ -300,8 +300,8 @@ if (PORT) {
       return;
     }
 
-    // ── Message endpoint (protected) ──
-    if (url.pathname === "/message") {
+    // ── Message endpoint (protected) — handles both / and /message ──
+    if (req.method === "POST" && (url.pathname === "/" || url.pathname === "/message")) {
       const user = await validateToken(req);
       if (!user) { unauthorized(res); return; }
 
@@ -313,7 +313,7 @@ if (PORT) {
     }
 
     // ── Serve public docs/privacy page ──
-    if (url.pathname === "/" || url.pathname === "/index.html") {
+    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
       const filePath = join(__dirname, "public", "index.html");
       if (existsSync(filePath)) {
         res.writeHead(200, { "Content-Type": "text/html" });
