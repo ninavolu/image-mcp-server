@@ -3,9 +3,13 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { createClerkClient } from "@clerk/backend";
 import { createClient } from "@supabase/supabase-js";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { createServer } from "http";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { z } from "zod";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load .env if present (local dev). Railway injects env vars directly.
 try {
@@ -225,6 +229,16 @@ if (PORT) {
       if (!transport) { res.writeHead(404); res.end("Session not found"); return; }
       await transport.handlePostMessage(req, res);
       return;
+    }
+
+    // ── Serve public docs/privacy page ──
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const filePath = join(__dirname, "public", "index.html");
+      if (existsSync(filePath)) {
+        res.writeHead(200, { "Content-Type": "text/html" });
+        res.end(readFileSync(filePath));
+        return;
+      }
     }
 
     res.writeHead(404);

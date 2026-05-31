@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Library MCP</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700&f[]=fraunces@700,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0e0e0c; --surface: #161613; --ink: #f0ece3;
+      --ink-muted: #8a8778; --accent: #c8b97a;
+    }
+    body { background: var(--bg); color: var(--ink); font-family: 'Cabinet Grotesk', sans-serif; font-size: 16px; line-height: 1.7; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav {
+      padding: 1.5rem 4rem;
+      border-bottom: 1px solid rgba(240,236,227,0.08);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .logo { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .nav-links { display: flex; gap: 2rem; font-size: 0.85rem; color: var(--ink-muted); }
+    .nav-links a { color: var(--ink-muted); }
+    .nav-links a:hover { color: var(--ink); text-decoration: none; }
+
+    .hero { padding: 5rem 4rem 3rem; max-width: 680px; }
+    .eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1rem; }
+    h1 { font-family: 'Fraunces', serif; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.02em; margin-bottom: 1.2rem; }
+    .hero p { color: var(--ink-muted); font-size: 1.05rem; max-width: 480px; }
+
+    .section { padding: 3rem 4rem; border-top: 1px solid rgba(240,236,227,0.08); }
+    h2 { font-family: 'Fraunces', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 1.5rem; letter-spacing: -0.01em; }
+    h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: var(--ink); }
+    p { color: var(--ink-muted); margin-bottom: 1rem; }
+
+    .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+    .tool-card {
+      background: var(--surface); border: 1px solid rgba(240,236,227,0.08);
+      border-radius: 12px; padding: 1.25rem 1.4rem;
+    }
+    .tool-name { font-weight: 700; font-size: 0.9rem; color: var(--ink); margin-bottom: 0.4rem; font-family: monospace; }
+    .tool-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; background: rgba(200,185,122,0.12); color: var(--accent); border: 1px solid rgba(200,185,122,0.2); margin-bottom: 0.5rem; }
+    .tool-desc { font-size: 0.85rem; color: var(--ink-muted); }
+
+    .code-block { background: var(--surface); border: 1px solid rgba(240,236,227,0.08); border-radius: 8px; padding: 1rem 1.25rem; font-family: monospace; font-size: 0.85rem; color: var(--ink); margin: 1rem 0; overflow-x: auto; }
+
+    .privacy-item { margin-bottom: 1.5rem; }
+
+    footer { padding: 2rem 4rem; border-top: 1px solid rgba(240,236,227,0.08); display: flex; justify-content: space-between; color: var(--ink-muted); font-size: 0.8rem; }
+
+    @media (max-width: 768px) {
+      nav, .hero, .section, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .tools { grid-template-columns: 1fr; }
+      .nav-links { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">imagelib</div>
+  <div class="nav-links">
+    <a href="#docs">Docs</a>
+    <a href="#privacy">Privacy</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <p class="eyebrow">MCP Connector</p>
+  <h1>Your image library,<br />inside Claude.</h1>
+  <p>A read-only MCP server that lets Claude search and use your curated image library — stored in Supabase, tagged by AI, accessible anywhere.</p>
+</section>
+
+<section class="section" id="docs">
+  <h2>Documentation</h2>
+
+  <h3>What it does</h3>
+  <p>Image Library MCP connects Claude to a curated database of images stored in Supabase. Claude can search by purpose (hero, landing-page, product, etc.) and tags to find the right image for any task.</p>
+
+  <h3>Tools</h3>
+  <div class="tools">
+    <div class="tool-card">
+      <div class="tool-name">search_images</div>
+      <div class="tool-badge">read-only</div>
+      <div class="tool-desc">Search images by purpose and/or tags. Returns name, URL, purpose, tags, and description for each match.</div>
+    </div>
+    <div class="tool-card">
+      <div class="tool-name">list_images</div>
+      <div class="tool-badge">read-only</div>
+      <div class="tool-desc">List all images in the library with pagination support.</div>
+    </div>
+  </div>
+
+  <h3>Example prompts</h3>
+  <div class="code-block">Find me a dark minimal hero image for a landing page</div>
+  <div class="code-block">Search my image library for nature photos tagged "outdoor"</div>
+  <div class="code-block">Build a landing page using the best hero image from my library</div>
+  <div class="code-block">List all product images I have available</div>
+
+  <h3>Setup</h3>
+  <p>Add the following to your <code style="background:rgba(240,236,227,0.08);padding:0.1em 0.4em;border-radius:4px;font-size:0.9em;">claude_desktop_config.json</code>:</p>
+  <div class="code-block">{
+  "mcpServers": {
+    "image-library": {
+      "url": "https://image-mcp-server-production.up.railway.app/sse"
+    }
+  }
+}</div>
+
+  <h3>Authentication</h3>
+  <p>This server uses OAuth 2.1. When you first connect, you'll be prompted to sign in with your email or Google account via Clerk.</p>
+</section>
+
+<section class="section" id="privacy">
+  <h2>Privacy Policy</h2>
+  <p style="color:var(--ink-muted);font-size:0.85rem;">Last updated: May 2026</p>
+
+  <div class="privacy-item">
+    <h3>Data we collect</h3>
+    <p>We collect your email address and name when you authenticate via Clerk (our OAuth provider). We do not collect any other personal data.</p>
+  </div>
+
+  <div class="privacy-item">
+    <h3>How we use your data</h3>
+    <p>Your account information is used solely to authenticate you to the MCP server. We do not use it for marketing, analytics, or any other purpose.</p>
+  </div>
+
+  <div class="privacy-item">
+    <h3>Data storage</h3>
+    <p>Authentication is handled by Clerk. Image metadata is stored in Supabase (PostgreSQL). Image files are stored in Supabase Storage. No personal data is stored in our image database.</p>
+  </div>
+
+  <div class="privacy-item">
+    <h3>Third-party services</h3>
+    <p>We use Clerk for authentication (<a href="https://clerk.com/privacy">clerk.com/privacy</a>) and Supabase for database and storage (<a href="https://supabase.com/privacy">supabase.com/privacy</a>).</p>
+  </div>
+
+  <div class="privacy-item">
+    <h3>Data retention</h3>
+    <p>Your account data is retained as long as your account is active. You may request deletion at any time by contacting us.</p>
+  </div>
+
+  <div class="privacy-item">
+    <h3>Contact</h3>
+    <p>For privacy questions or data deletion requests, email <a href="mailto:ninavolu7@gmail.com">ninavolu7@gmail.com</a>.</p>
+  </div>
+</section>
+
+<footer>
+  <span>Image Library MCP — built by Neel</span>
+  <span><a href="#privacy">Privacy Policy</a></span>
+</footer>
+
+</body>
+</html>
