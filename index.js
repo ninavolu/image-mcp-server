@@ -62,12 +62,7 @@ function createMcpServer() {
   // ─── search_images ──────────────────────────────────────────────────────────
   server.tool(
     "search_images",
-    {
-      title: "Search Images",
-      description: "Search the image library by purpose and/or tags. Returns matching images with their file paths.",
-      readOnlyHint: true,
-      openWorldHint: false,
-    },
+    "Search the image library by purpose and/or tags. Returns matching images with their public URLs, purpose, tags, and description.",
     {
       purpose: z
         .enum(["landing-page","hero","document","thumbnail","icon","background","product","avatar","other"])
@@ -76,17 +71,22 @@ function createMcpServer() {
       tags: z.array(z.string()).default([]).describe("Filter by tags — returns images that have ALL of these tags"),
       limit: z.number().default(10).describe("Max results to return"),
     },
+    {
+      title: "Search Images",
+      readOnlyHint: true,
+      openWorldHint: false,
+    },
     async ({ purpose, tags, limit }) => {
       let query = supabase.from("images").select("*").limit(limit);
       if (purpose) query = query.eq("purpose", purpose);
       if (tags.length > 0) query = query.contains("tags", tags);
       const { data, error } = await query.order("created_at", { ascending: false });
 
-      if (error) return { content: [{ type: "text", text: `Error: ${error.message}` }] };
+      if (error) return { content: [{ type: "text", text: `Error querying images: ${error.message}` }] };
       if (!data.length) return { content: [{ type: "text", text: "No images found matching those criteria." }] };
 
       const results = data.map(img =>
-        `• [${img.id}] ${img.name}\n  Path: ${img.file_path}\n  Purpose: ${img.purpose} | Tags: ${img.tags?.join(", ") || "none"}\n  ${img.description || ""}`
+        `• [${img.id}] ${img.name}\n  URL: ${img.file_path}\n  Purpose: ${img.purpose} | Tags: ${img.tags?.join(", ") || "none"}\n  ${img.description || ""}`
       ).join("\n\n");
 
       return { content: [{ type: "text", text: `Found ${data.length} image(s):\n\n${results}` }] };
@@ -96,15 +96,15 @@ function createMcpServer() {
   // ─── list_images ────────────────────────────────────────────────────────────
   server.tool(
     "list_images",
-    {
-      title: "List Images",
-      description: "List all images in the library, optionally paginated.",
-      readOnlyHint: true,
-      openWorldHint: false,
-    },
+    "List all images in the library with their URLs, purpose, and tags. Supports pagination.",
     {
       limit: z.number().default(20).describe("Max results"),
       offset: z.number().default(0).describe("Offset for pagination"),
+    },
+    {
+      title: "List Images",
+      readOnlyHint: true,
+      openWorldHint: false,
     },
     async ({ limit, offset }) => {
       const { data, error, count } = await supabase
