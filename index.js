@@ -147,6 +147,7 @@ if (PORT) {
 
   const httpServer = createServer(async (req, res) => {
     const url = new URL(req.url, `http://localhost`);
+    console.log(`[req] ${req.method} ${url.pathname} auth:${req.headers["authorization"] ? "yes" : "no"}`);
 
     // ── Health check (public) ──
     if (url.pathname === "/health") {
