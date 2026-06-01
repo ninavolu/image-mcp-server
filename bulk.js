@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
  * Bulk image importer with auto-tagging via Claude Haiku vision
- * Uploads all images in a folder to Supabase Storage,
- * auto-generates purpose + tags + description, and registers them.
+ * Uploads images to Cloudflare R2 (publicly accessible by anyone including Claude),
+ * auto-generates purpose + tags + description, and registers them in Supabase.
  *
  * Usage:
  *   node bulk.js <folder_path>
@@ -13,6 +13,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { resolve, extname, basename } from "path";
 import { readFile } from "fs/promises";
@@ -32,6 +33,16 @@ const supabase = createClient(
 );
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+// Cloudflare R2 client (S3-compatible)
+const r2 = new S3Client({
+  region: "auto",
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+  },
+});
 
 const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 const PURPOSES = ["landing-page","hero","document","thumbnail","icon","background","product","avatar","other"];
@@ -57,7 +68,7 @@ if (!files.length) {
   process.exit(1);
 }
 
-console.log(`Found ${files.length} image(s) — auto-tagging with Claude Haiku\n`);
+console.log(`Found ${files.length} image(s) — uploading to R2 + auto-tagging with Claude Haiku\n`);
 
 async function analyzeImage(publicUrl) {
   const response = await anthropic.messages.create({
@@ -100,14 +111,15 @@ for (const file of files) {
   const ext = extname(file).slice(1).toLowerCase();
   const contentTypes = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp", gif: "image/gif" };
   const contentType = contentTypes[ext] ?? "image/jpeg";
+  const name = basename(file, extname(file));
 
   process.stdout.write(`${file}... `);
 
-  // Check for duplicate
+  // Check for duplicate in DB
   const { data: existing } = await supabase
     .from("images")
     .select("id")
-    .eq("name", basename(file, extname(file)))
+    .eq("name", name)
     .maybeSingle();
 
   if (existing) {
@@ -118,21 +130,24 @@ for (const file of files) {
   // Read file
   const fileBuffer = await readFile(filePath);
 
-  // Upload to Supabase Storage first
-  const { error: uploadError } = await supabase.storage
-    .from("images")
-    .upload(file, fileBuffer, { contentType, upsert: true });
-
-  if (uploadError) {
-    console.log(`✗ Upload failed: ${uploadError.message}`);
+  // Upload to Cloudflare R2
+  try {
+    await r2.send(new PutObjectCommand({
+      Bucket: process.env.R2_BUCKET,
+      Key: file,
+      Body: fileBuffer,
+      ContentType: contentType,
+    }));
+  } catch (e) {
+    console.log(`✗ R2 upload failed: ${e.message}`);
     failed++;
     continue;
   }
 
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(file);
+  // Public URL via R2 public domain
+  const publicUrl = `${process.env.R2_PUBLIC_URL}/${file}`;
 
-  // Auto-tag with Claude Haiku using the public URL (no size limit)
+  // Auto-tag with Claude Haiku using the public URL
   let analysis;
   try {
     analysis = await analyzeImage(publicUrl);
@@ -142,9 +157,9 @@ for (const file of files) {
     continue;
   }
 
-  // Register in DB with AI-generated metadata
+  // Register in Supabase DB
   const { error: dbError } = await supabase.from("images").insert({
-    name: basename(file, extname(file)),
+    name,
     file_path: publicUrl,
     purpose: analysis.purpose,
     tags: analysis.tags,

@@ -3,688 +3,764 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Image Library — MCP Connector</title>
-  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+  <title>Pixlib — MCP Image Library</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=syne@700,800&f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:           #0b0b09;
-      --surface:      #141412;
-      --surface-2:    #1c1c19;
-      --border:       rgba(240,236,227,0.07);
-      --border-hover: rgba(200,185,122,0.25);
-      --ink:          #f0ece3;
-      --ink-muted:    #7a7870;
-      --ink-dim:      #4a4840;
-      --accent:       #c8b97a;
-      --accent-dim:   rgba(200,185,122,0.1);
-      --green:        #4a9e6a;
+      --bg:        #0a0a08;
+      --s1:        #111110;
+      --s2:        #191917;
+      --s3:        #222220;
+      --border:    rgba(240,236,227,0.07);
+      --bh:        rgba(200,185,122,0.2);
+      --ink:       #f0ece3;
+      --muted:     #6e6c66;
+      --dim:       #3a3835;
+      --accent:    #c8b97a;
+      --adim:      rgba(200,185,122,0.1);
+      --green:     #4a9e6a;
+      --gdim:      rgba(74,158,106,0.12);
+      --orange:    #e8855a;
+      --odim:      rgba(232,133,90,0.12);
+      --red:       #e05555;
+      --rdim:      rgba(224,85,85,0.1);
 
-      --shadow-2: 0 4px 8px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
-      --shadow-3: 0 10px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
-      --shadow-4: 0 20px 40px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.4);
-      --shadow-5: 0 32px 64px rgba(0,0,0,0.7), 0 12px 24px rgba(0,0,0,0.5);
+      --sh2: 0 3px 8px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+      --sh3: 0 8px 24px rgba(0,0,0,0.5), 0 3px 8px rgba(0,0,0,0.3);
+      --sh4: 0 16px 40px rgba(0,0,0,0.6), 0 6px 12px rgba(0,0,0,0.4);
+      --sh5: 0 28px 56px rgba(0,0,0,0.7), 0 10px 20px rgba(0,0,0,0.5);
 
-      --ease-expo:   cubic-bezier(0.16, 1, 0.3, 1);
-      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
-      --ease-silk:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      --expo:   cubic-bezier(0.16, 1, 0.3, 1);
+      --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+      --silk:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
     html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--ink);
-      font-family: 'Satoshi', sans-serif;
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+    body { background: var(--bg); color: var(--ink); font-family: 'Cabinet Grotesk', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden; }
 
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      padding: 0 4rem;
-      height: 64px;
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(11,11,9,0.85);
-      backdrop-filter: blur(20px);
+      padding: 0 4rem; height: 60px;
+      background: rgba(10,10,8,0.9); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      animation: fadeDown 0.6s var(--ease-expo) both;
+      animation: fadeDown 0.6s var(--expo) both;
     }
-
-    .logo {
-      font-family: 'Clash Display', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      color: var(--ink);
-    }
-    .logo span { color: var(--accent); }
-
-    .nav-right { display: flex; align-items: center; gap: 2rem; }
+    .nav-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+    .nav-logo span { color: var(--accent); }
     .nav-links { display: flex; gap: 1.5rem; }
-    .nav-links a {
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--ink-muted);
-      text-decoration: none;
-      transition: color 0.2s ease;
-      position: relative;
-    }
-    .nav-links a::after {
-      content: '';
-      position: absolute; bottom: -2px; left: 0; right: 0;
-      height: 1px; background: var(--accent);
-      transform: scaleX(0); transform-origin: left;
-      transition: transform 0.3s var(--ease-expo);
-    }
+    .nav-links a { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
     .nav-links a:hover { color: var(--ink); }
-    .nav-links a:hover::after { transform: scaleX(1); }
-
-    .live-badge {
-      display: flex; align-items: center; gap: 0.4rem;
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--green);
-      background: rgba(74,158,106,0.1);
-      border: 1px solid rgba(74,158,106,0.25);
-      padding: 0.3rem 0.75rem; border-radius: 2rem;
-    }
-    .live-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--green);
-      animation: pulse 2s ease infinite;
-    }
+    .nav-live { display: flex; align-items: center; gap: 0.4rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); background: var(--gdim); border: 1px solid rgba(74,158,106,0.2); padding: 0.3rem 0.7rem; border-radius: 2rem; }
+    .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulse 2s ease infinite; }
 
     /* ── HERO ── */
-    .hero {
-      padding: 6rem 4rem 4rem;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-      min-height: 88vh;
-    }
-
-    .hero-left { animation: fadeUp 0.9s var(--ease-expo) 0.1s both; }
-
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 0.6rem;
-      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
-      text-transform: uppercase; color: var(--accent);
-      margin-bottom: 1.5rem;
-    }
-    .eyebrow::before {
-      content: '';
-      display: block; width: 24px; height: 1px;
-      background: var(--accent);
-    }
-
-    h1 {
-      font-family: 'Clash Display', sans-serif;
-      font-size: clamp(3rem, 6vw, 5.2rem);
-      font-weight: 700;
-      line-height: 1.0;
-      letter-spacing: -0.03em;
-      margin-bottom: 1.5rem;
-    }
+    .hero { padding: 6rem 4rem 4rem; max-width: 900px; animation: fadeUp 0.9s var(--expo) 0.1s both; }
+    .hero-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
+    .hero-eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--accent); }
+    h1 { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 1.5rem; }
     h1 em { font-style: italic; color: var(--accent); }
+    .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 560px; line-height: 1.8; margin-bottom: 2rem; }
+    .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .pill { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; padding: 0.3rem 0.75rem; border-radius: 2rem; border: 1px solid var(--border); color: var(--muted); background: var(--s1); transition: border-color 0.2s, color 0.2s; }
+    .pill:hover { border-color: var(--bh); color: var(--ink); }
+    .pill.accent { background: var(--adim); color: var(--accent); border-color: rgba(200,185,122,0.2); }
+    .hero-foot { font-size: 0.75rem; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
 
-    .hero-desc {
-      font-size: 1.05rem;
-      color: var(--ink-muted);
-      line-height: 1.8;
-      max-width: 420px;
-      margin-bottom: 2.5rem;
-    }
-
-    .hero-ctas { display: flex; gap: 1rem; flex-wrap: wrap; animation: fadeUp 0.9s var(--ease-expo) 0.35s both; }
-
-    .btn {
-      position: relative; overflow: hidden;
-      display: inline-flex; align-items: center; gap: 0.5rem;
-      padding: 0.75rem 1.5rem;
-      font-family: 'Satoshi', sans-serif;
-      font-size: 0.85rem; font-weight: 700;
-      letter-spacing: 0.02em;
-      border-radius: 8px;
-      text-decoration: none;
-      cursor: pointer; border: none;
-      transform: translateY(0);
-      transition: transform 0.2s var(--ease-expo), box-shadow 0.2s ease;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: #0b0b09;
-      box-shadow: 0 4px 16px rgba(200,185,122,0.3);
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(200,185,122,0.4);
-    }
-    .btn-primary:active { transform: translateY(1px); }
-    .btn-primary::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
-      transform: translateX(-100%);
-      transition: transform 0.5s ease;
-    }
-    .btn-primary:hover::after { transform: translateX(100%); }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--ink-muted);
-      border: 1px solid var(--border);
-    }
-    .btn-ghost:hover {
-      color: var(--ink);
-      border-color: rgba(240,236,227,0.2);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-2);
-    }
-
-    /* ── HERO TERMINAL ── */
-    .hero-right { animation: fadeUp 0.9s var(--ease-expo) 0.25s both; }
-
-    .terminal {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-top: 1px solid rgba(255,255,255,0.1);
-      border-left: 1px solid rgba(255,255,255,0.06);
-      border-radius: 16px;
-      box-shadow: var(--shadow-4);
-      overflow: hidden;
-      animation: float 6s ease-in-out infinite;
-    }
-
-    .terminal-bar {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.9rem 1.25rem;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-    }
-    .terminal-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-    }
-    .terminal-dot:nth-child(1) { background: #ff5f57; }
-    .terminal-dot:nth-child(2) { background: #ffbd2e; }
-    .terminal-dot:nth-child(3) { background: #28c840; }
-    .terminal-title {
-      margin-left: auto; margin-right: auto;
-      font-size: 0.72rem; color: var(--ink-dim);
-      font-family: monospace;
-    }
-
-    .terminal-body { padding: 1.5rem; font-family: monospace; font-size: 0.82rem; line-height: 1.9; }
-    .t-prompt { color: var(--ink-dim); }
-    .t-tool { color: var(--accent); }
-    .t-string { color: #7ec8a4; }
-    .t-key { color: #88b4e0; }
-    .t-val { color: var(--ink-muted); }
-    .t-result { color: var(--ink); margin-top: 0.5rem; }
-    .t-url { color: #88b4e0; font-size: 0.75rem; word-break: break-all; }
-    .t-sep { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
-    .t-tag {
-      display: inline-block;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border: 1px solid rgba(200,185,122,0.2);
-      border-radius: 4px;
-      font-size: 0.68rem;
-      padding: 0.1rem 0.4rem;
-      margin: 0 0.15rem;
-      font-family: 'Satoshi', sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-    }
-
-    .typing::after {
-      content: '|';
-      animation: blink 1s step-end infinite;
-    }
-
-    /* ── STATS ── */
-    .stats {
-      margin: 0 4rem;
-      padding: 1.5rem 2.5rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      display: flex; gap: 0;
-      box-shadow: var(--shadow-2);
-      animation: fadeUp 0.8s var(--ease-expo) 0.5s both;
-    }
-    .stat {
-      flex: 1;
-      display: flex; flex-direction: column; gap: 0.3rem;
-      padding: 0 2rem;
-      border-right: 1px solid var(--border);
-    }
-    .stat:first-child { padding-left: 0; }
-    .stat:last-child { border-right: none; }
-    .stat-num {
-      font-family: 'Clash Display', sans-serif;
-      font-size: 2.2rem; font-weight: 700;
-      color: var(--ink); line-height: 1;
-    }
-    .stat-num span { color: var(--accent); }
-    .stat-label {
-      font-size: 0.72rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--ink-dim);
-    }
+    /* ── METRICS ── */
+    .metrics { margin: 0 4rem; padding: 1.5rem 2.5rem; background: var(--s1); border: 1px solid var(--border); border-radius: 14px; display: flex; gap: 0; animation: fadeUp 0.8s var(--expo) 0.3s both; box-shadow: var(--sh2); }
+    .metric { flex: 1; padding: 0 2rem; border-right: 1px solid var(--border); }
+    .metric:first-child { padding-left: 0; }
+    .metric:last-child { border-right: none; }
+    .metric-val { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--ink); }
+    .metric-val span { color: var(--accent); }
+    .metric-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-top: 0.3rem; }
 
     /* ── SECTIONS ── */
-    .section {
-      padding: 5rem 4rem;
-      border-top: 1px solid var(--border);
-      opacity: 0; transform: translateY(28px);
-      transition: opacity 0.7s var(--ease-expo), transform 0.7s var(--ease-expo);
-    }
+    .section { padding: 5rem 4rem; border-top: 1px solid var(--border); opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--expo), transform 0.7s var(--expo); }
     .section.visible { opacity: 1; transform: translateY(0); }
+    .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 3rem; }
+    h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+    .sh-sub { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+    p { color: var(--muted); line-height: 1.75; }
 
-    .section-header {
-      display: flex; align-items: baseline; gap: 1rem;
-      margin-bottom: 3rem;
-    }
-    h2 {
-      font-family: 'Clash Display', sans-serif;
-      font-size: 2rem; font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-    .section-count {
-      font-size: 0.75rem; font-weight: 700;
-      letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--ink-dim);
-    }
+    /* ── ARCHITECTURE ── */
+    .arch { background: var(--s1); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; box-shadow: var(--sh2); overflow: hidden; }
+    .arch-diagram { display: grid; grid-template-columns: 1fr 80px 1fr 80px 1fr; align-items: center; gap: 0; margin-bottom: 2rem; }
+    .arch-node { background: var(--s2); border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1.25rem; box-shadow: var(--sh2); }
+    .arch-node-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
+    .arch-node-desc { font-size: 0.8rem; color: var(--muted); }
+    .arch-arrow { text-align: center; color: var(--dim); font-size: 1.2rem; }
+    .arch-mgmt { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .arch-mgmt-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.75rem; }
+    .arch-cli { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .cli-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 0.25rem 0.6rem; background: var(--s3); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); }
 
-    /* ── TOOL CARDS ── */
-    .tools-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
+    /* ── DATA LAYER ── */
+    .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    .data-card { background: var(--s1); border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.75rem; box-shadow: var(--sh2); }
+    .data-card-title { font-weight: 700; font-size: 0.9rem; color: var(--ink); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .data-card-badge { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.2rem 0.5rem; border-radius: 4px; }
+    .badge-green { background: var(--gdim); color: var(--green); border: 1px solid rgba(74,158,106,0.2); }
+    .badge-orange { background: var(--odim); color: var(--orange); border: 1px solid rgba(232,133,90,0.2); }
+    .badge-accent { background: var(--adim); color: var(--accent); border: 1px solid rgba(200,185,122,0.2); }
+    .badge-red { background: var(--rdim); color: var(--red); border: 1px solid rgba(224,85,85,0.15); }
+    .schema { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; background: var(--s2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin: 0.75rem 0; color: var(--muted); line-height: 2; overflow-x: auto; }
+    .schema .k { color: #88b4e0; }
+    .schema .t { color: var(--accent); }
+    .schema .c { color: var(--dim); }
+    .issue-note { display: flex; align-items: flex-start; gap: 0.5rem; background: var(--rdim); border: 1px solid rgba(224,85,85,0.15); border-radius: 8px; padding: 0.75rem 1rem; margin-top: 0.75rem; font-size: 0.8rem; color: var(--red); }
 
-    .tool-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-top: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 2rem;
-      box-shadow: var(--shadow-2);
-      transform: perspective(800px) rotateX(0) rotateY(0) translateZ(0);
-      transition: box-shadow 0.4s var(--ease-silk), border-color 0.3s ease;
-      cursor: default;
-    }
-    .tool-card:hover {
-      box-shadow: var(--shadow-4);
-      border-color: var(--border-hover);
-    }
+    /* ── STACK ── */
+    .stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+    .stack-card { background: var(--s1); border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; box-shadow: var(--sh2); transition: box-shadow 0.3s var(--silk), border-color 0.3s ease, transform 0.3s var(--silk); cursor: default; }
+    .stack-card:hover { box-shadow: var(--sh4); border-color: var(--bh); }
+    .stack-card-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .stack-card-role { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .stack-card-detail { font-size: 0.75rem; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
 
-    .tool-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
-    .tool-name {
-      font-family: monospace;
-      font-size: 1rem; font-weight: 700;
-      color: var(--ink);
-    }
-    .tool-badge {
-      font-size: 0.65rem; font-weight: 700;
-      letter-spacing: 0.08em; text-transform: uppercase;
-      padding: 0.25rem 0.6rem; border-radius: 4px;
-      background: var(--accent-dim);
-      color: var(--accent);
-      border: 1px solid rgba(200,185,122,0.2);
-    }
-    .tool-desc { font-size: 0.9rem; color: var(--ink-muted); line-height: 1.7; margin-bottom: 1.25rem; }
-    .tool-params { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-    .param {
-      font-size: 0.7rem; font-family: monospace;
-      padding: 0.2rem 0.5rem; border-radius: 4px;
-      background: var(--surface-2);
-      color: var(--ink-dim);
-      border: 1px solid var(--border);
-    }
+    /* ── STATUS ── */
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .status-col-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    .status-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+    .status-item:last-child { border-bottom: none; }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 0.4rem; }
+    .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot-orange { background: var(--orange); }
+    .status-text { font-size: 0.85rem; color: var(--muted); }
 
-    /* ── PROMPTS ── */
-    .prompts { display: flex; flex-direction: column; gap: 0.75rem; }
-    .prompt-item {
-      display: flex; align-items: center; gap: 1rem;
-      padding: 1rem 1.25rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s var(--ease-expo);
-    }
-    .prompt-item:hover {
-      border-color: var(--border-hover);
-      background: var(--surface-2);
-      transform: translateX(4px);
-    }
-    .prompt-arrow { color: var(--accent); font-size: 0.8rem; flex-shrink: 0; }
-    .prompt-text { font-size: 0.9rem; color: var(--ink-muted); font-style: italic; }
+    /* ── GALLERY ── */
+    .gallery-grid { columns: 3; column-gap: 1rem; }
+    .gallery-item { break-inside: avoid; margin-bottom: 1rem; position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--sh2); transition: box-shadow 0.4s var(--silk), transform 0.4s var(--silk); }
+    .gallery-item:hover { box-shadow: var(--sh4); transform: translateY(-4px); }
+    .gallery-item img { width: 100%; display: block; filter: saturate(0.85); transition: filter 0.4s ease, transform 0.6s var(--silk); }
+    .gallery-item:hover img { filter: saturate(1); transform: scale(1.03); }
+    .gallery-item-meta { position: absolute; bottom: 0; left: 0; right: 0; padding: 0.75rem 1rem; background: linear-gradient(transparent, rgba(10,10,8,0.9)); opacity: 0; transition: opacity 0.3s ease; }
+    .gallery-item:hover .gallery-item-meta { opacity: 1; }
+    .gallery-item-name { font-size: 0.72rem; font-weight: 700; color: var(--ink); }
+    .gallery-item-tags { font-size: 0.65rem; color: var(--muted); margin-top: 0.2rem; }
 
-    /* ── CODE BLOCK ── */
-    .code-block {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 1.5rem 0;
-      box-shadow: var(--shadow-2);
-    }
-    .code-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1.25rem;
-      background: var(--surface-2);
-      border-bottom: 1px solid var(--border);
-      font-size: 0.72rem; color: var(--ink-dim);
-      font-family: monospace;
-    }
-    .code-body {
-      padding: 1.25rem;
-      font-family: monospace; font-size: 0.85rem;
-      color: var(--ink); line-height: 1.8;
-      overflow-x: auto;
-    }
-    .code-key { color: #88b4e0; }
-    .code-str { color: #7ec8a4; }
-    .code-punc { color: var(--ink-dim); }
+    /* ── CODE ── */
+    .code-wrap { background: var(--s1); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--sh3); }
+    .code-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; background: var(--s2); border-bottom: 1px solid var(--border); }
+    .code-dots { display: flex; gap: 0.4rem; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-file { font-size: 0.72rem; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
+    .code-body { padding: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; line-height: 1.9; overflow: hidden; max-height: 400px; position: relative; cursor: none; }
+    .code-body:hover { max-height: 400px; }
+    .ck { color: #88b4e0; } .cs { color: #7ec8a4; } .cc { color: var(--dim); } .cf { color: var(--accent); } .cn { color: #c8a0e8; }
 
-    /* ── PRIVACY ── */
-    .privacy-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.25rem;
-    }
-    .privacy-card {
-      padding: 1.75rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
-    .privacy-card h3 {
-      font-family: 'Clash Display', sans-serif;
-      font-size: 1rem; font-weight: 600;
-      margin-bottom: 0.75rem; color: var(--ink);
-    }
-    .privacy-card p {
-      font-size: 0.88rem; color: var(--ink-muted); line-height: 1.75;
-    }
-    .privacy-card a { color: var(--accent); text-decoration: none; }
-    .privacy-card a:hover { text-decoration: underline; }
+    /* ── PROBLEMS ── */
+    .problems-list { display: flex; flex-direction: column; gap: 1rem; }
+    .problem-card { background: var(--s1); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; box-shadow: var(--sh2); display: grid; grid-template-columns: auto 1fr 1fr; gap: 1.5rem; align-items: start; transition: border-color 0.2s ease; }
+    .problem-card:hover { border-color: rgba(240,236,227,0.12); }
+    .problem-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--dim); line-height: 1; min-width: 2rem; }
+    .problem-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
+    .problem-text { font-size: 0.85rem; color: var(--muted); }
+    .problem-resolved .problem-label { color: var(--green); }
+    .problem-unresolved .problem-label { color: var(--orange); }
+
+    /* ── FOOTER CTA ── */
+    .footer-cta { padding: 5rem 4rem; text-align: center; border-top: 1px solid var(--border); }
+    .footer-cta-quote { font-family: 'Syne', sans-serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    .footer-cta-desc { font-size: 0.95rem; color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem; line-height: 1.8; }
+    .footer-cta-email { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); text-decoration: none; }
+    .footer-cta-email:hover { text-decoration: underline; }
 
     /* ── FOOTER ── */
-    footer {
-      padding: 2rem 4rem;
-      border-top: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 0.8rem; color: var(--ink-dim);
-    }
-    footer a { color: var(--ink-muted); text-decoration: none; }
-    footer a:hover { color: var(--ink); }
+    footer { padding: 1.5rem 4rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--dim); }
+    footer a { color: var(--dim); text-decoration: none; }
+    footer a:hover { color: var(--muted); }
+
+    /* ── PRIVACY ── */
+    .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .privacy-card { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
+    .privacy-card h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--ink); }
+    .privacy-card p { font-size: 0.85rem; }
+    .privacy-card a { color: var(--accent); text-decoration: none; }
 
     /* ── ANIMATIONS ── */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(28px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      33%       { transform: translateY(-10px) rotate(0.5deg); }
-      66%       { transform: translateY(-5px) rotate(-0.5deg); }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.4; transform: scale(0.85); }
-    }
-    @keyframes blink {
-      0%, 100% { opacity: 1; } 50% { opacity: 0; }
-    }
-    @keyframes typeIn {
-      from { width: 0; } to { width: 100%; }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeDown { from { opacity: 0; transform: translateY(-14px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     @media (max-width: 900px) {
-      .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 3rem; }
-      .hero-right { display: none; }
-      nav, .hero, .stats, .section, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-      .stats { flex-direction: column; gap: 1.5rem; }
-      .stat { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 1.5rem; }
-      .stat:last-child { border-bottom: none; }
-      .tools-grid, .privacy-grid { grid-template-columns: 1fr; }
+      nav, .hero, .metrics, .section, .footer-cta, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .metrics { flex-direction: column; gap: 1rem; }
+      .metric { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 1rem; }
+      .metric:last-child { border-bottom: none; }
+      .data-grid, .stack-grid, .status-grid, .privacy-grid { grid-template-columns: 1fr; }
+      .gallery-grid { columns: 2; }
+      .arch-diagram { grid-template-columns: 1fr; }
+      .arch-arrow { display: none; }
+      .problem-card { grid-template-columns: 1fr; }
+      .problem-num { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
-  <div class="logo">image<span>lib</span></div>
-  <div class="nav-right">
-    <div class="nav-links">
-      <a href="#docs">Docs</a>
-      <a href="#prompts">Examples</a>
-      <a href="#privacy">Privacy</a>
-    </div>
-    <div class="live-badge"><div class="live-dot"></div>Live</div>
+  <div class="nav-logo">pix<span>lib</span></div>
+  <div class="nav-links">
+    <a href="#architecture">Architecture</a>
+    <a href="#stack">Stack</a>
+    <a href="#status">Status</a>
+    <a href="#problems">Problems</a>
+    <a href="#privacy">Privacy</a>
   </div>
+  <div class="nav-live"><div class="live-dot"></div>Live on Railway</div>
 </nav>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-left">
-    <div class="eyebrow">MCP Connector for Claude</div>
-    <h1>Your images,<br /><em>always</em><br />on hand.</h1>
-    <p class="hero-desc">
-      A read-only MCP server that gives Claude access to your curated image library —
-      auto-tagged by AI, stored in Supabase, searchable by purpose and style.
-    </p>
-    <div class="hero-ctas">
-      <a href="#docs" class="btn btn-primary">Get started</a>
-      <a href="#privacy" class="btn btn-ghost">Privacy policy</a>
-    </div>
+  <div class="hero-eyebrow">MCP Image Library</div>
+  <h1>Images for<br /><em>Claude,</em><br />on demand.</h1>
+  <p class="hero-desc">
+    A remote MCP server that gives Claude access to a curated image library. Claude searches by tag or purpose, gets back public URLs, and uses them anywhere — landing pages, docs, PDFs, slide decks.
+  </p>
+  <div class="pills">
+    <span class="pill accent">Railway · hosted</span>
+    <span class="pill">OAuth 2.1 · Clerk</span>
+    <span class="pill">Cloudflare R2 · storage</span>
+    <span class="pill">Supabase · metadata</span>
+    <span class="pill accent">pixlib.app · live</span>
   </div>
-
-  <div class="hero-right">
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="terminal-dot"></div>
-        <div class="terminal-dot"></div>
-        <div class="terminal-dot"></div>
-        <div class="terminal-title">image-library · MCP</div>
-      </div>
-      <div class="terminal-body">
-        <div><span class="t-prompt">claude &gt; </span><span class="t-tool">search_images</span>(<span class="t-key">purpose</span>: <span class="t-string">"hero"</span>, <span class="t-key">tags</span>: [<span class="t-string">"dark"</span>])</div>
-        <hr class="t-sep" />
-        <div class="t-result">Found <strong style="color:var(--accent)">3</strong> image(s)</div>
-        <br />
-        <div><span class="t-key">name</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t-val">forest-hero-dark</span></div>
-        <div><span class="t-key">purpose</span> &nbsp; <span class="t-string">hero</span></div>
-        <div><span class="t-key">tags</span> &nbsp;&nbsp;&nbsp;&nbsp; <span class="t-tag">dark</span><span class="t-tag">nature</span><span class="t-tag">minimal</span></div>
-        <div><span class="t-key">url</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t-url">https://ohdrnymwmhdtqfvaboxe.supabase.co/storage/v1/object/public/images/jplenio-forest.jpg</span></div>
-        <br />
-        <div><span class="t-key">name</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t-val">chameleon-closeup</span></div>
-        <div><span class="t-key">purpose</span> &nbsp; <span class="t-string">hero</span></div>
-        <div><span class="t-key">tags</span> &nbsp;&nbsp;&nbsp;&nbsp; <span class="t-tag">dark</span><span class="t-tag">wildlife</span><span class="t-tag">colorful</span></div>
-        <div class="typing" style="color:var(--ink-dim);font-size:0.75rem;margin-top:0.75rem;"></div>
-      </div>
-    </div>
-  </div>
+  <div class="hero-foot">Live images · Cloudflare R2 · pixlib.app</div>
 </section>
 
-<!-- STATS -->
-<div class="stats">
-  <div class="stat">
-    <div class="stat-num">2<span></span></div>
-    <div class="stat-label">MCP Tools</div>
+<!-- METRICS -->
+<div class="metrics">
+  <div class="metric">
+    <div class="metric-val">9<span></span></div>
+    <div class="metric-label">Images in library</div>
   </div>
-  <div class="stat">
-    <div class="stat-num">9<span></span></div>
-    <div class="stat-label">Purpose categories</div>
+  <div class="metric">
+    <div class="metric-val">2<span></span></div>
+    <div class="metric-label">MCP tools exposed</div>
   </div>
-  <div class="stat">
-    <div class="stat-num">0<span>ms</span></div>
-    <div class="stat-label">Local storage needed</div>
+  <div class="metric">
+    <div class="metric-val">5<span></span></div>
+    <div class="metric-label">Infrastructure pieces</div>
   </div>
-  <div class="stat">
-    <div class="stat-num">∞<span></span></div>
-    <div class="stat-label">Images supported</div>
+  <div class="metric">
+    <div class="metric-val">2.<span>1</span></div>
+    <div class="metric-label">OAuth version</div>
+  </div>
+  <div class="metric">
+    <div class="metric-val">3<span></span></div>
+    <div class="metric-label">CLI utilities built</div>
   </div>
 </div>
 
-<!-- TOOLS -->
-<section class="section" id="docs">
-  <div class="section-header">
-    <h2>Tools</h2>
-    <span class="section-count">02 read-only</span>
+<!-- ARCHITECTURE -->
+<section class="section" id="architecture">
+  <div class="section-head">
+    <h2>Architecture</h2>
+    <span class="sh-sub">how it connects</span>
   </div>
-  <div class="tools-grid">
-    <div class="tool-card card-3d">
-      <div class="tool-header">
-        <div class="tool-name">search_images</div>
-        <div class="tool-badge">read-only</div>
+  <div class="arch">
+    <div class="arch-diagram">
+      <div class="arch-node">
+        <div class="arch-node-title">Claude Desktop</div>
+        <div class="arch-node-desc">Local stdio transport. No auth required. Connects directly to index.js via node process.</div>
       </div>
-      <p class="tool-desc">Search your image library by purpose and tags. Claude finds the best match for any task — landing pages, docs, hero shots, and more.</p>
-      <div class="tool-params">
-        <span class="param">purpose?</span>
-        <span class="param">tags[]?</span>
-        <span class="param">limit?</span>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-title">Railway MCP Server</div>
+        <div class="arch-node-desc">StreamableHTTP transport at pixlib.app. Stateless — new McpServer per POST request.</div>
       </div>
-    </div>
-    <div class="tool-card card-3d">
-      <div class="tool-header">
-        <div class="tool-name">list_images</div>
-        <div class="tool-badge">read-only</div>
-      </div>
-      <p class="tool-desc">List all images in your library with full metadata — name, URL, purpose, tags, and AI-generated description. Supports pagination.</p>
-      <div class="tool-params">
-        <span class="param">limit?</span>
-        <span class="param">offset?</span>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-node-title">Supabase + R2</div>
+        <div class="arch-node-desc">Postgres stores metadata. R2 stores image files. Only connect at write time (bulk.js).</div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- EXAMPLE PROMPTS -->
-<section class="section" id="prompts">
-  <div class="section-header">
-    <h2>Example prompts</h2>
-    <span class="section-count">Try these</span>
-  </div>
-  <div class="prompts">
-    <div class="prompt-item">
-      <span class="prompt-arrow">&#8594;</span>
-      <span class="prompt-text">"Find me a dark minimal hero image for my landing page"</span>
-    </div>
-    <div class="prompt-item">
-      <span class="prompt-arrow">&#8594;</span>
-      <span class="prompt-text">"Build a product page using the best image from my library"</span>
-    </div>
-    <div class="prompt-item">
-      <span class="prompt-arrow">&#8594;</span>
-      <span class="prompt-text">"Search my image library for nature photos tagged outdoor"</span>
-    </div>
-    <div class="prompt-item">
-      <span class="prompt-arrow">&#8594;</span>
-      <span class="prompt-text">"List all available hero images and pick the most minimal one"</span>
-    </div>
-    <div class="prompt-item">
-      <span class="prompt-arrow">&#8594;</span>
-      <span class="prompt-text">"Create a slide deck and use images from my library for each section"</span>
+    <div class="arch-mgmt">
+      <div class="arch-mgmt-label">Management layer (your machine only)</div>
+      <div class="arch-cli">
+        <span class="cli-tag">bulk.js — bulk import + R2 upload + auto-tag</span>
+        <span class="cli-tag">manage.js — add/remove individual images</span>
+        <span class="cli-tag">migrate-to-r2.js — one-time Supabase → R2 migration</span>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- SETUP -->
+<!-- DATA LAYER -->
 <section class="section">
-  <div class="section-header">
-    <h2>Setup</h2>
-    <span class="section-count">2 steps</span>
+  <div class="section-head">
+    <h2>Data Layer</h2>
+    <span class="sh-sub">two databases, one purpose</span>
   </div>
-  <p style="color:var(--ink-muted);margin-bottom:1.5rem;">Add this to your <code style="background:var(--surface-2);padding:0.15em 0.4em;border-radius:4px;font-size:0.9em;border:1px solid var(--border)">claude_desktop_config.json</code> file:</p>
-  <div class="code-block">
-    <div class="code-header">
-      <span>claude_desktop_config.json</span>
-      <span>JSON</span>
+  <div class="data-grid">
+    <div class="data-card">
+      <div class="data-card-title">
+        Supabase Postgres
+        <span class="data-card-badge badge-green">metadata</span>
+      </div>
+      <p>Stores everything Claude needs: name, URL, purpose, tags, description. Tag filtering uses Postgres array operators so Claude can ask for images with ALL specified tags.</p>
+      <div class="schema">
+        <span class="c">-- images table</span><br />
+        <span class="k">id</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t">uuid</span> &nbsp;&nbsp;&nbsp; primary key<br />
+        <span class="k">name</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t">text</span> &nbsp;&nbsp;&nbsp; not null<br />
+        <span class="k">file_path</span> &nbsp; <span class="t">text</span> &nbsp;&nbsp;&nbsp; R2 public URL<br />
+        <span class="k">purpose</span> &nbsp;&nbsp;&nbsp; <span class="t">text</span> &nbsp;&nbsp;&nbsp; hero | landing-page | ...<br />
+        <span class="k">tags</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <span class="t">text[]</span> &nbsp; GIN indexed array<br />
+        <span class="k">description</span> <span class="t">text</span> &nbsp;&nbsp;&nbsp; AI generated<br />
+        <span class="k">created_at</span> <span class="t">timestamptz</span> default now()
+      </div>
     </div>
-    <div class="code-body">
-<span class="code-punc">{</span><br />
-&nbsp;&nbsp;<span class="code-key">"mcpServers"</span><span class="code-punc">: {</span><br />
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"image-library"</span><span class="code-punc">: {</span><br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-key">"url"</span><span class="code-punc">: </span><span class="code-str">"https://image-mcp-server-production.up.railway.app/sse"</span><br />
-&nbsp;&nbsp;&nbsp;&nbsp;<span class="code-punc">}</span><br />
-&nbsp;&nbsp;<span class="code-punc">}</span><br />
-<span class="code-punc">}</span>
+    <div class="data-card">
+      <div class="data-card-title">
+        Cloudflare R2
+        <span class="data-card-badge badge-accent">file store</span>
+      </div>
+      <p>Stores the actual image files. No egress fees, global CDN, public bucket. Migrated from Supabase Storage because Supabase's CDN was blocking Anthropic's server IPs.</p>
+      <div class="schema">
+        <span class="c">// bulk.js upload flow</span><br />
+        <span class="k">await</span> r2.<span class="cf">send</span>(<span class="ck">new</span> <span class="cn">PutObjectCommand</span>({<br />
+        &nbsp;&nbsp;<span class="k">Bucket</span>: <span class="cs">"pixlib-images"</span>,<br />
+        &nbsp;&nbsp;<span class="k">Key</span>: filename,<br />
+        &nbsp;&nbsp;<span class="k">Body</span>: fileBuffer,<br />
+        &nbsp;&nbsp;<span class="k">ContentType</span>: contentType<br />
+        }));
+      </div>
+      <div class="issue-note">
+        Known issue: Cloudflare R2 also blocks Anthropic's IP range (160.79.104.0/21). Images load in browsers but Claude cannot fetch them server-side. PDF generation with embedded images is currently broken.
+      </div>
     </div>
   </div>
-  <p style="color:var(--ink-muted);font-size:0.9rem;">When you first connect, you'll be asked to sign in with your email or Google account. That's it.</p>
+</section>
+
+<!-- STACK -->
+<section class="section" id="stack">
+  <div class="section-head">
+    <h2>Stack</h2>
+    <span class="sh-sub">6 pieces</span>
+  </div>
+  <div class="stack-grid">
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">Supabase</div>
+      <div class="stack-card-role">Postgres for image metadata</div>
+      <div class="stack-card-detail">ohdrnymwmhdtqfvaboxe.supabase.co</div>
+    </div>
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">Cloudflare R2</div>
+      <div class="stack-card-role">File store, migrated from Supabase Storage</div>
+      <div class="stack-card-detail">pub-ec825bb937cf408697bc337c32cd668b.r2.dev</div>
+    </div>
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">Railway</div>
+      <div class="stack-card-role">Hosts the MCP server at pixlib.app</div>
+      <div class="stack-card-detail">StreamableHTTP transport · port 8080</div>
+    </div>
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">Clerk</div>
+      <div class="stack-card-role">OAuth 2.1 provider for remote connections</div>
+      <div class="stack-card-detail">clerk.pixlib.app · production instance</div>
+    </div>
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">MCP SDK</div>
+      <div class="stack-card-role">StreamableHTTP remote, stdio local</div>
+      <div class="stack-card-detail">@modelcontextprotocol/sdk v1.29.0</div>
+    </div>
+    <div class="stack-card card-3d">
+      <div class="stack-card-name">Porkbun</div>
+      <div class="stack-card-role">Domain registrar for pixlib.app</div>
+      <div class="stack-card-detail">DNS via Cloudflare · SSL via Railway</div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS -->
+<section class="section" id="status">
+  <div class="section-head">
+    <h2>Status</h2>
+    <span class="sh-sub">what works, what doesn't</span>
+  </div>
+  <div class="status-grid">
+    <div>
+      <div class="status-col-title" style="color:var(--green)">
+        <div class="live-dot"></div>Working
+      </div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">Local MCP via Claude Desktop (stdio)</div></div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">Remote MCP via Claude.ai (StreamableHTTP + OAuth)</div></div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">OAuth 2.1 flow via Clerk production instance</div></div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">Auto-tagging with Claude Haiku on bulk import</div></div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">search_images and list_images tools verified in MCP Inspector</div></div>
+      <div class="status-item"><div class="status-dot dot-green"></div><div class="status-text">Submitted to Anthropic Connectors Directory</div></div>
+    </div>
+    <div>
+      <div class="status-col-title" style="color:var(--orange)">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--orange);display:inline-block;"></div>
+        In Progress
+      </div>
+      <div class="status-item"><div class="status-dot dot-orange"></div><div class="status-text">Server-side image fetching — blocked by R2/Anthropic IP issue</div></div>
+      <div class="status-item"><div class="status-dot dot-orange"></div><div class="status-text">PDF generation with embedded images — same IP blocker</div></div>
+      <div class="status-item"><div class="status-dot dot-orange"></div><div class="status-text">Anthropic directory review — ~2 week wait</div></div>
+      <div class="status-item"><div class="status-dot dot-orange"></div><div class="status-text">Landing page, pricing, socials (Step 4)</div></div>
+      <div class="status-item"><div class="status-dot dot-orange"></div><div class="status-text">CDN that doesn't block Anthropic's IP range (160.79.104.0/21)</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section">
+  <div class="section-head">
+    <h2>Library</h2>
+    <span class="sh-sub">9 images · Cloudflare R2</span>
+  </div>
+  <div class="gallery-grid">
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/wolfgang_hasselmann-elephant-10098979_1920.jpg" alt="elephant" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">elephant</div><div class="gallery-item-tags">nature · wildlife</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/wal_172619-flower-9643005_1920.jpg" alt="flower" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">flower</div><div class="gallery-item-tags">nature · colorful</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/jplenio-forest-3804001_1920.jpg" alt="forest" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">forest</div><div class="gallery-item-tags">nature · dark · minimal</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/anrita1705-sunflowers-8175248_1920.jpg" alt="sunflowers" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">sunflowers</div><div class="gallery-item-tags">nature · warm · outdoor</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/davidclode-chameleon-10277347_1920.jpg" alt="chameleon" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">chameleon</div><div class="gallery-item-tags">nature · wildlife · colorful</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/ykaiavu-field-9652621_1920.jpg" alt="field" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">field</div><div class="gallery-item-tags">nature · outdoor · warm</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/mirek_hejnicki-beskid-10094941_1920.jpg" alt="mountain" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">mountain</div><div class="gallery-item-tags">nature · landscape · cool</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/7010naoto-nature-9715206_1920.jpg" alt="nature" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">nature</div><div class="gallery-item-tags">nature · outdoor</div></div>
+    </div>
+    <div class="gallery-item">
+      <img src="https://pub-ec825bb937cf408697bc337c32cd668b.r2.dev/img1.png" alt="landscape" loading="lazy" />
+      <div class="gallery-item-meta"><div class="gallery-item-name">landscape</div><div class="gallery-item-tags">background · outdoor · rolling hills</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE -->
+<section class="section">
+  <div class="section-head">
+    <h2>Code</h2>
+    <span class="sh-sub">index.js — move mouse to scroll</span>
+  </div>
+  <div class="code-wrap">
+    <div class="code-bar">
+      <div class="code-dots">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+      </div>
+      <div class="code-file">index.js · StreamableHTTP · Railway</div>
+    </div>
+    <div class="code-body" id="codeBody">
+<span class="ck">import</span> { <span class="cn">McpServer</span> } <span class="ck">from</span> <span class="cs">"@modelcontextprotocol/sdk/server/mcp.js"</span>;<br />
+<span class="ck">import</span> { <span class="cn">StreamableHTTPServerTransport</span> } <span class="ck">from</span> <span class="cs">"@modelcontextprotocol/sdk/server/streamableHttp.js"</span>;<br />
+<span class="ck">import</span> { <span class="cf">createClerkClient</span> } <span class="ck">from</span> <span class="cs">"@clerk/backend"</span>;<br />
+<br />
+<span class="cc">// Opaque token store — avoids exposing Clerk JWTs to Claude.ai</span><br />
+<span class="ck">const</span> tokenStore = <span class="ck">new</span> <span class="cn">Map</span>();<br />
+<br />
+<span class="ck">async function</span> <span class="cf">validateToken</span>(req) {<br />
+&nbsp;&nbsp;<span class="ck">const</span> token = req.headers[<span class="cs">"authorization"</span>]?.slice(<span class="cn">7</span>);<br />
+&nbsp;&nbsp;<span class="ck">if</span> (!token) <span class="ck">return null</span>;<br />
+&nbsp;&nbsp;<span class="ck">if</span> (token === process.env.INSPECTOR_KEY) <span class="ck">return</span> { sub: <span class="cs">"inspector"</span> };<br />
+&nbsp;&nbsp;<span class="ck">const</span> entry = tokenStore.<span class="cf">get</span>(token);<br />
+&nbsp;&nbsp;<span class="ck">if</span> (!entry || Date.<span class="cf">now</span>() > entry.expiresAt) <span class="ck">return null</span>;<br />
+&nbsp;&nbsp;<span class="ck">return</span> { sub: entry.sub };<br />
+}<br />
+<br />
+<span class="cc">// MCP tools — read-only, annotated</span><br />
+server.<span class="cf">tool</span>(<span class="cs">"search_images"</span>, <span class="cs">"Search by purpose and tags..."</span>, {<br />
+&nbsp;&nbsp;purpose: z.<span class="cf">enum</span>([<span class="cs">"hero"</span>, <span class="cs">"landing-page"</span>, <span class="cs">"..."</span>]).<span class="cf">optional</span>(),<br />
+&nbsp;&nbsp;tags: z.<span class="cf">array</span>(z.<span class="cf">string</span>()).<span class="cf">default</span>([]),<br />
+&nbsp;&nbsp;limit: z.<span class="cf">number</span>().<span class="cf">default</span>(<span class="cn">10</span>),<br />
+}, { title: <span class="cs">"Search Images"</span>, readOnlyHint: <span class="ck">true</span> }, <span class="ck">async</span> ({ purpose, tags, limit }) => {<br />
+&nbsp;&nbsp;<span class="ck">let</span> query = supabase.<span class="cf">from</span>(<span class="cs">"images"</span>).<span class="cf">select</span>(<span class="cs">"*"</span>).<span class="cf">limit</span>(limit);<br />
+&nbsp;&nbsp;<span class="ck">if</span> (purpose) query = query.<span class="cf">eq</span>(<span class="cs">"purpose"</span>, purpose);<br />
+&nbsp;&nbsp;<span class="ck">if</span> (tags.length) query = query.<span class="cf">contains</span>(<span class="cs">"tags"</span>, tags);<br />
+&nbsp;&nbsp;<span class="ck">const</span> { data } = <span class="ck">await</span> query;<br />
+&nbsp;&nbsp;<span class="ck">return</span> { content: [{ type: <span class="cs">"text"</span>, text: <span class="cf">formatResults</span>(data) }] };<br />
+});<br />
+<br />
+<span class="cc">// Stateless StreamableHTTP — new server per POST request</span><br />
+<span class="ck">if</span> (req.method === <span class="cs">"POST"</span>) {<br />
+&nbsp;&nbsp;<span class="ck">const</span> transport = <span class="ck">new</span> <span class="cn">StreamableHTTPServerTransport</span>({<br />
+&nbsp;&nbsp;&nbsp;&nbsp;sessionIdGenerator: <span class="ck">undefined</span>, <span class="cc">// stateless</span><br />
+&nbsp;&nbsp;});<br />
+&nbsp;&nbsp;<span class="ck">const</span> mcpServer = <span class="cf">createMcpServer</span>();<br />
+&nbsp;&nbsp;<span class="ck">await</span> mcpServer.<span class="cf">connect</span>(transport);<br />
+&nbsp;&nbsp;<span class="ck">await</span> transport.<span class="cf">handleRequest</span>(req, res);<br />
+}
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS -->
+<section class="section" id="problems">
+  <div class="section-head">
+    <h2>Problems</h2>
+    <span class="sh-sub">what broke, how we fixed it</span>
+  </div>
+  <div class="problems-list">
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">01</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Node.js 18 on Railway — no native WebSocket support, Supabase client crashed on startup</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Added <code style="font-family:monospace;font-size:0.8em">"engines": {"node": ">=20"}</code> to package.json, forced Railway to use Node 24</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">02</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">GitHub authentication failing — password auth is not supported for Git operations</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Generated SSH key, added public key to GitHub, switched remote URL to git@ format</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">03</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Images over 5MB failing Claude Haiku vision — base64 encoding exceeded API limit</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Upload image to Supabase first, then pass public URL to Claude instead of base64 bytes</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">04</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Tool annotations breaking handler — "typedHandler is not a function" error in MCP Inspector</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Wrong SDK API — annotations must be the 4th argument, handler the 5th, not merged into description object</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">05</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Claude Desktop rejected remote MCP — "url field not a valid MCP server configuration"</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Claude Desktop doesn't support URL-based remote MCPs yet. Kept local stdio for Desktop, Railway URL for Claude.ai</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">06</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">OAuth redirect hitting Clerk dev domain — SSL error on accounts.*.clerk.accounts.dev</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Created Clerk production instance, bought pixlib.app domain, added DNS records, hardcoded clerk.pixlib.app</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">07</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Claude.ai rejected Clerk JWT — token missing standard "aud" claim, Clerk uses "client_id" instead</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Switched to opaque token store — exchange Clerk JWT internally, issue a random hex token to Claude.ai</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">08</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">MCP messages posting to "/" not "/message" — 404 on every tool call, tools appeared connected but silent</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Updated message handler to accept POST to both "/" and "/message", switched SSE endpoint path to "/"</div></div>
+    </div>
+
+    <div class="problem-card problem-resolved">
+      <div class="problem-num">09</div>
+      <div><div class="problem-label">Problem</div><div class="problem-text">Tools connected but not discoverable — Claude.ai showed "no tools available" after OAuth succeeded</div></div>
+      <div><div class="problem-label">Resolved</div><div class="problem-text">Claude.ai uses StreamableHTTP not SSE. Switched transport. Stateless mode (new server per POST) fixed tool discovery</div></div>
+    </div>
+
+    <div class="problem-card problem-unresolved">
+      <div class="problem-num">10</div>
+      <div><div class="problem-label">Problem — Unresolved</div><div class="problem-text">Supabase Storage CDN blocking Anthropic's IP range (160.79.104.0/21) — Claude gets 403 on image fetch</div></div>
+      <div><div class="problem-label">Attempted Fix</div><div class="problem-text">Migrated to Cloudflare R2. R2 also blocks Anthropic's IPs. Images load in browsers but Claude cannot fetch server-side. PDF generation broken.</div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TIMELINE -->
+<section class="section" id="timeline">
+  <div class="section-head">
+    <h2>Development</h2>
+    <span class="sh-sub">local → hosted</span>
+  </div>
+  <div style="position:relative;padding-left:2rem;">
+    <div style="position:absolute;left:0;top:0;bottom:0;width:1px;background:var(--border);"></div>
+
+    <div style="position:relative;margin-bottom:2.5rem;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">Local MCP via stdio</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Built index.js with two read-only tools — search_images and list_images. Connected to Claude Desktop via node process in claude_desktop_config.json. No auth, no server, just a local pipe. First proof that Claude could query a Supabase image database.</div>
+    </div>
+
+    <div style="position:relative;margin-bottom:2.5rem;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--muted);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">Supabase Storage + bulk.js</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Added bulk.js to import entire folders at once. Switched from manual tagging to Claude Haiku vision — images are uploaded then analyzed via their public URL. Auto-generates purpose, tags, and description for each image.</div>
+    </div>
+
+    <div style="position:relative;margin-bottom:2.5rem;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--muted);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">Railway deployment + SSE transport</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Pushed to GitHub, connected Railway. Switched from stdio to SSE transport so the server could run remotely. Added health check, OAuth metadata discovery, and the first attempt at Clerk OAuth — hit multiple issues with JWT format, wrong transport, and IP blocks.</div>
+    </div>
+
+    <div style="position:relative;margin-bottom:2.5rem;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--muted);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">Custom domain + Clerk production</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Bought pixlib.app via Porkbun, pointed DNS to Railway, provisioned SSL. Migrated Clerk from dev to production instance — required 5 DNS records and a separate Cloudflare setup. OAuth login finally worked end-to-end.</div>
+    </div>
+
+    <div style="position:relative;margin-bottom:2.5rem;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--muted);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">StreamableHTTP + opaque tokens</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Discovered Claude.ai uses StreamableHTTP, not SSE. Switched transport. Clerk JWTs were missing the "aud" claim so Claude rejected them — replaced with an opaque token store. Tools finally appeared in Claude.ai settings.</div>
+    </div>
+
+    <div style="position:relative;">
+      <div style="position:absolute;left:-2.35rem;top:0.3rem;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);"></div>
+      <div style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:800;color:var(--ink);letter-spacing:-0.02em;margin-bottom:0.4rem;">Live on Claude.ai · Submitted to Anthropic</div>
+      <div style="font-size:0.85rem;color:var(--muted);max-width:560px;">Connector live at pixlib.app with full OAuth 2.1 flow. Migrated images to Cloudflare R2. Submitted to the Anthropic Connectors Directory. Remaining blocker: both Supabase and R2 block Anthropic's server IPs for direct image fetching.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROOF OF LOCAL MCP -->
+<section class="section">
+  <div class="section-head">
+    <h2>Proof of Work</h2>
+    <span class="sh-sub">local MCP · Claude Desktop · stdio</span>
+  </div>
+  <p style="margin-bottom:2rem;max-width:540px;">These are real tool call responses captured from Claude Desktop during local development. Three calls to list_images showing the library growing from 0 → 4 → 8 images as bulk.js imports ran.</p>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;">
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-top:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;box-shadow:var(--sh2);">
+      <div style="padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:#3a3835;"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);">list_images</span>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Request</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);background:var(--s2);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;">{}</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Response</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--orange);background:var(--s2);border-radius:6px;padding:0.75rem;">No images in library yet.</div>
+        <div style="margin-top:0.75rem;font-size:0.72rem;color:var(--dim);">Before first bulk import</div>
+      </div>
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-top:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;box-shadow:var(--sh2);">
+      <div style="padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);">list_images</span>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Request</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);background:var(--s2);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;">{}</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Response</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink);background:var(--s2);border-radius:6px;padding:0.75rem;line-height:1.8;">Showing <span style="color:#5eadea;">1–4</span> of <span style="color:#5eadea;">4</span> image(s):<br /><br />• ykaiavu-field...<br />&nbsp;&nbsp;Path: [truncated]</div>
+        <div style="margin-top:0.75rem;font-size:0.72rem;color:var(--dim);">After first batch import</div>
+      </div>
+    </div>
+
+    <div style="background:var(--s1);border:1px solid var(--border);border-top:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden;box-shadow:var(--sh2);">
+      <div style="padding:0.75rem 1rem;background:var(--s2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);">list_images</span>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Request</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--muted);background:var(--s2);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:1rem;">{}</div>
+        <div style="font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--dim);margin-bottom:0.5rem;">Response</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--ink);background:var(--s2);border-radius:6px;padding:0.75rem;line-height:1.8;">Showing <span style="color:#5eadea;">1–8</span> of <span style="color:#5eadea;">8</span> image(s):<br /><br />• wolfgang_hasselmann...<br />&nbsp;&nbsp;Path: [truncated]</div>
+        <div style="margin-top:0.75rem;font-size:0.72rem;color:var(--dim);">After second batch import</div>
+      </div>
+    </div>
+
+  </div>
 </section>
 
 <!-- PRIVACY -->
 <section class="section" id="privacy">
-  <div class="section-header">
+  <div class="section-head">
     <h2>Privacy Policy</h2>
-    <span class="section-count">Last updated May 2026</span>
+    <span class="sh-sub">Last updated June 2026</span>
   </div>
   <div class="privacy-grid">
     <div class="privacy-card">
-      <h3>Data we collect</h3>
-      <p>We collect your email address and name when you authenticate via Clerk. No other personal data is collected.</p>
+      <h3>Data collected</h3>
+      <p>Email address and name when you authenticate via Clerk. No other personal data is collected or stored.</p>
     </div>
     <div class="privacy-card">
-      <h3>How we use it</h3>
-      <p>Your account information is used solely to authenticate you to the MCP server. No marketing, no analytics, no tracking.</p>
+      <h3>How it's used</h3>
+      <p>Authentication only. No marketing, no analytics, no tracking. Your credentials are never shared.</p>
     </div>
     <div class="privacy-card">
-      <h3>Storage</h3>
-      <p>Authentication is handled by <a href="https://clerk.com/privacy">Clerk</a>. Image metadata and files are stored in <a href="https://supabase.com/privacy">Supabase</a>. No personal data enters our image database.</p>
+      <h3>Third-party services</h3>
+      <p>Auth via <a href="https://clerk.com/privacy">Clerk</a>. Metadata via <a href="https://supabase.com/privacy">Supabase</a>. Files via <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare R2</a>.</p>
     </div>
     <div class="privacy-card">
-      <h3>Retention & contact</h3>
-      <p>Your data is retained while your account is active. Request deletion anytime at <a href="mailto:ninavolu7@gmail.com">ninavolu7@gmail.com</a>.</p>
+      <h3>Contact</h3>
+      <p>Data deletion requests: <a href="mailto:ninavolu7@gmail.com">ninavolu7@gmail.com</a>. Data retained while account is active.</p>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
+<!-- FOOTER CTA -->
+<div class="footer-cta">
+  <div class="footer-cta-quote">"One more protocol, one more capability."</div>
+  <p class="footer-cta-desc">Started as a local experiment. Shipped as a remotely-hosted MCP server with OAuth 2.1, auto-tagging via Claude Haiku, and a Cloudflare R2 image store. Next: Anthropic directory.</p>
+  <a href="mailto:ninavolu7@gmail.com" class="footer-cta-email">ninavolu7@gmail.com</a>
+</div>
+
 <footer>
-  <span>Image Library MCP &mdash; built by NeelInavolu</span>
+  <span>Neel Inavolu · 2026 · Pixlib</span>
   <div style="display:flex;gap:1.5rem;">
-    <a href="#docs">Docs</a>
-    <a href="#privacy">Privacy</a>
-    <a href="https://github.com/ninavolu/image-mcp-server">GitHub</a>
+    <a href="#">Railway</a>
+    <a href="#">Supabase</a>
+    <a href="#">Cloudflare R2</a>
+    <a href="#">Clerk</a>
+    <a href="#">MCP SDK</a>
   </div>
 </footer>
 
 <script>
   // Scroll reveal
-  const sections = document.querySelectorAll('.section');
   const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-    });
-  }, { threshold: 0.08 });
-  sections.forEach(s => observer.observe(s));
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
 
-  // 3D mouse-tracking tilt on tool cards
+  // 3D tilt on stack cards
   document.querySelectorAll('.card-3d').forEach(card => {
     card.addEventListener('mousemove', e => {
       const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width  - 0.5;
-      const y = (e.clientY - r.top)  / r.height - 0.5;
-      card.style.transform = `perspective(800px) rotateY(${x * 10}deg) rotateX(${y * -10}deg) translateZ(12px)`;
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `perspective(700px) rotateY(${x*10}deg) rotateX(${y*-10}deg) translateZ(10px)`;
       card.style.transition = 'transform 0.08s linear, box-shadow 0.3s ease, border-color 0.3s ease';
     });
     card.addEventListener('mouseleave', () => {
-      card.style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) translateZ(0)';
+      card.style.transform = 'perspective(700px) rotateY(0) rotateX(0) translateZ(0)';
       card.style.transition = 'transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.4s ease, border-color 0.3s ease';
     });
   });
+
+  // Code scroll via mouse position
+  const codeBody = document.getElementById('codeBody');
+  if (codeBody) {
+    codeBody.addEventListener('mousemove', e => {
+      const r = codeBody.getBoundingClientRect();
+      const pct = (e.clientY - r.top) / r.height;
+      const maxScroll = codeBody.scrollHeight - codeBody.clientHeight;
+      codeBody.scrollTop = pct * maxScroll;
+    });
+  }
 </script>
 </body>
 </html>
