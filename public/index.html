@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pixlib — MCP Image Library</title>
-  <link href="https://api.fontshare.com/v2/css?f[]=syne@700,800&f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,7 +39,7 @@
     }
 
     html { scroll-behavior: smooth; }
-    body { background: var(--bg); color: var(--ink); font-family: 'Cabinet Grotesk', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--ink); font-family: 'Satoshi', sans-serif; font-size: 16px; line-height: 1.6; overflow-x: hidden; }
 
     /* ── NAV ── */
     nav {
@@ -50,7 +50,7 @@
       border-bottom: 1px solid var(--border);
       animation: fadeDown 0.6s var(--expo) both;
     }
-    .nav-logo { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
+    .nav-logo { font-family: 'Clash Display', sans-serif; font-size: 1rem; font-weight: 800; letter-spacing: -0.02em; color: var(--ink); }
     .nav-logo span { color: var(--accent); }
     .nav-links { display: flex; gap: 1.5rem; }
     .nav-links a { font-size: 0.8rem; font-weight: 500; color: var(--muted); text-decoration: none; transition: color 0.2s; }
@@ -62,7 +62,7 @@
     .hero { padding: 6rem 4rem 4rem; max-width: 900px; animation: fadeUp 0.9s var(--expo) 0.1s both; }
     .hero-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.6rem; }
     .hero-eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--accent); }
-    h1 { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 1.5rem; }
+    h1 { font-family: 'Clash Display', sans-serif; font-size: clamp(3rem, 7vw, 6rem); font-weight: 800; line-height: 0.95; letter-spacing: -0.04em; margin-bottom: 1.5rem; }
     h1 em { font-style: italic; color: var(--accent); }
     .hero-desc { font-size: 1.05rem; color: var(--muted); max-width: 560px; line-height: 1.8; margin-bottom: 2rem; }
     .pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
@@ -76,7 +76,7 @@
     .metric { flex: 1; padding: 0 2rem; border-right: 1px solid var(--border); }
     .metric:first-child { padding-left: 0; }
     .metric:last-child { border-right: none; }
-    .metric-val { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--ink); }
+    .metric-val { font-family: 'Clash Display', sans-serif; font-size: 2.2rem; font-weight: 800; line-height: 1; color: var(--ink); }
     .metric-val span { color: var(--accent); }
     .metric-label { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); margin-top: 0.3rem; }
 
@@ -84,7 +84,7 @@
     .section { padding: 5rem 4rem; border-top: 1px solid var(--border); opacity: 0; transform: translateY(24px); transition: opacity 0.7s var(--expo), transform 0.7s var(--expo); }
     .section.visible { opacity: 1; transform: translateY(0); }
     .section-head { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 3rem; }
-    h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
+    h2 { font-family: 'Clash Display', sans-serif; font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; }
     .sh-sub { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
     p { color: var(--muted); line-height: 1.75; }
 
@@ -119,7 +119,7 @@
     .stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .stack-card { background: var(--s1); border: 1px solid var(--border); border-top: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; box-shadow: var(--sh2); transition: box-shadow 0.3s var(--silk), border-color 0.3s ease, transform 0.3s var(--silk); cursor: default; }
     .stack-card:hover { box-shadow: var(--sh4); border-color: var(--bh); }
-    .stack-card-name { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .stack-card-name { font-family: 'Clash Display', sans-serif; font-size: 1rem; font-weight: 800; color: var(--ink); margin-bottom: 0.4rem; letter-spacing: -0.02em; }
     .stack-card-role { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.75rem; }
     .stack-card-detail { font-size: 0.75rem; color: var(--dim); font-family: 'JetBrains Mono', monospace; }
 
@@ -158,7 +158,7 @@
     .problems-list { display: flex; flex-direction: column; gap: 1rem; }
     .problem-card { background: var(--s1); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; box-shadow: var(--sh2); display: grid; grid-template-columns: auto 1fr 1fr; gap: 1.5rem; align-items: start; transition: border-color 0.2s ease; }
     .problem-card:hover { border-color: rgba(240,236,227,0.12); }
-    .problem-num { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--dim); line-height: 1; min-width: 2rem; }
+    .problem-num { font-family: 'Clash Display', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--dim); line-height: 1; min-width: 2rem; }
     .problem-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.4rem; }
     .problem-text { font-size: 0.85rem; color: var(--muted); }
     .problem-resolved .problem-label { color: var(--green); }
@@ -166,7 +166,7 @@
 
     /* ── FOOTER CTA ── */
     .footer-cta { padding: 5rem 4rem; text-align: center; border-top: 1px solid var(--border); }
-    .footer-cta-quote { font-family: 'Syne', sans-serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; }
+    .footer-cta-quote { font-family: 'Clash Display', sans-serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; }
     .footer-cta-desc { font-size: 0.95rem; color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem; line-height: 1.8; }
     .footer-cta-email { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent); text-decoration: none; }
     .footer-cta-email:hover { text-decoration: underline; }
@@ -179,7 +179,7 @@
     /* ── PRIVACY ── */
     .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
     .privacy-card { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
-    .privacy-card h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--ink); }
+    .privacy-card h3 { font-family: 'Clash Display', sans-serif; font-size: 0.95rem; font-weight: 700; margin-bottom: 0.6rem; color: var(--ink); }
     .privacy-card p { font-size: 0.85rem; }
     .privacy-card a { color: var(--accent); text-decoration: none; }
 
