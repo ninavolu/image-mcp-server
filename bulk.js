@@ -13,7 +13,6 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
-import { S3Client, PutObjectCommand, HeadObjectCommand } from "@aws-sdk/client-s3";
 import { readFileSync, readdirSync, existsSync } from "fs";
 import { resolve, extname, basename } from "path";
 import { readFile } from "fs/promises";
@@ -33,16 +32,6 @@ const supabase = createClient(
 );
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-// Cloudflare R2 client (S3-compatible)
-const r2 = new S3Client({
-  region: "auto",
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
 
 const IMAGE_EXTS = [".png", ".jpg", ".jpeg", ".webp", ".gif"];
 const PURPOSES = ["landing-page","hero","document","thumbnail","icon","background","product","avatar","other"];
@@ -68,7 +57,7 @@ if (!files.length) {
   process.exit(1);
 }
 
-console.log(`Found ${files.length} image(s) — uploading to R2 + auto-tagging with Claude Haiku\n`);
+console.log(`Found ${files.length} image(s) — uploading to Supabase + auto-tagging with Claude Haiku\n`);
 
 async function analyzeImage(publicUrl) {
   const response = await anthropic.messages.create({
@@ -130,22 +119,19 @@ for (const file of files) {
   // Read file
   const fileBuffer = await readFile(filePath);
 
-  // Upload to Cloudflare R2
-  try {
-    await r2.send(new PutObjectCommand({
-      Bucket: process.env.R2_BUCKET,
-      Key: file,
-      Body: fileBuffer,
-      ContentType: contentType,
-    }));
-  } catch (e) {
-    console.log(`✗ R2 upload failed: ${e.message}`);
+  // Upload to Supabase Storage
+  const { error: uploadError } = await supabase.storage
+    .from("images")
+    .upload(file, fileBuffer, { contentType, upsert: true });
+
+  if (uploadError) {
+    console.log(`✗ Upload failed: ${uploadError.message}`);
     failed++;
     continue;
   }
 
-  // Public URL via R2 public domain
-  const publicUrl = `${process.env.R2_PUBLIC_URL}/${file}`;
+  // Get Supabase public URL
+  const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(file);
 
   // Auto-tag with Claude Haiku using the public URL
   let analysis;
